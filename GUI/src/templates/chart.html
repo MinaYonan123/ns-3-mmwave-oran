@@ -420,16 +420,12 @@
 
                             let label = dataset.label || '';
                             if (dataPoint) {
-                                if (dataset.label === 'UEs') {
-                                    label += `\nID: ${dataPoint.ue_id}`;
-                                } else if (dataset.label === 'Cells') {
-                                    label += `\nID: ${dataPoint.cell_id}`;
-                                }
+                                label += `\nID: ${dataPoint.ue_id}`;
                                 label += `\nX: ${dataPoint.x.toFixed(1)}`;
                                 label += `\nY: ${dataPoint.y.toFixed(1)}`;
                                 if (dataset.label === 'UEs') {
                                     label += `\nType: ${dataPoint.type}`;
-                                    label += `\nConnected to Cell: ${dataPoint.MMWave_Cell || 'N/A'}`;
+                                    label += `\nConnected to Cell: ${dataPoint.connected_to || 'N/A'}`;
                                 } else if (dataset.label === 'Cells') {
                                     label += `\nType: ${dataPoint.type}`;
                                 }
@@ -448,54 +444,49 @@
 
     function updateChart() {
         fetch('/refresh-data')
-                .then(response => response.json())
-                .then(data => {
-                    const cellColorMap = new Map(data.cells.map((cell, index) => [
-                        cell.cell_id, cellColors[index % cellColors.length]
-                    ]));
+            .then(response => response.json())
+            .then(data => {
+                const cellColorMap = new Map(data.cells.map((cell, index) => [
+                    cell.cell_id, cellColors[index % cellColors.length]
+                ]));
 
-                    const cellData = data.cells.map(cell => ({
-                        x: cell.x_position,
-                        y: cell.y_position,
-                        cell_id: cell.cell_id,
-                        type: cell.type,
-                        backgroundColor: cellColorMap.get(cell.cell_id),
-                        pointStyle: cell.type === 'lte' ? 'rect' : 'triangle'
-                    }));
+                const cellData = data.cells.map(cell => ({
+                    x: cell.x_position,
+                    y: cell.y_position,
+                    cell_id: cell.cell_id,
+                    type: cell.type,
+                    backgroundColor: cellColorMap.get(cell.cell_id),
+                    pointStyle: cell.type === 'lte' ? 'rect' : 'triangle'
+                }));
 
-                    const ueData = data.ues.map(ue => ({
-                        x: ue.x_position,
-                        y: ue.y_position,
-                        ue_id: ue.ue_id,
-                        type: ue.type,
-                        connected_to: ue.connected_to,
-                        backgroundColor: cellColorMap.get(ue.connected_to)
-                    }));
+                const ueData = data.ues.map(ue => ({
+                    x: ue.x_position,
+                    y: ue.y_position,
+                    ue_id: ue.ue_id,
+                    type: ue.type,
+                    connected_to: ue.connected_to,
+                    backgroundColor: cellColorMap.get(ue.connected_to)
+                }));
 
-                    myChart.data.datasets[0].data = ueData;
-                    myChart.data.datasets[0].backgroundColor = ueData.map(ue => ue.backgroundColor);
-                    myChart.data.datasets[1].data = cellData;
-                    myChart.data.datasets[1].backgroundColor = cellData.map(cell => cell.backgroundColor);
-                    myChart.data.datasets[1].pointStyle = cellData.map(cell => cell.pointStyle);
+                myChart.data.datasets[0].data = ueData;
+                myChart.data.datasets[0].backgroundColor = ueData.map(ue => ue.backgroundColor);
+                myChart.data.datasets[1].data = cellData;
+                myChart.data.datasets[1].backgroundColor = cellData.map(cell => cell.backgroundColor);
+                myChart.data.datasets[1].pointStyle = cellData.map(cell => cell.pointStyle);
 
-                    var chartDimensions = data.max_x_max_y;
-                    myChart.options.scales.x.min = 0;
-                    myChart.options.scales.x.max = chartDimensions[0];
-                    myChart.options.scales.y.min = 0;
-                    myChart.options.scales.y.max = chartDimensions[1];
+                var chartDimensions = data.max_x_max_y;
+                myChart.options.scales.x.min = 0;
+                myChart.options.scales.x.max = chartDimensions[0];
+                myChart.options.scales.y.min = 0;
+                myChart.options.scales.y.max = chartDimensions[1];
 
-                    myChart.update();
+                myChart.update();
 
-                    function formatAndDisplayCellData(data) {
-                        return data.map(cell => {
-                            return `<div class="object-box">${Object.entries(cell)
-                                    .map(([key, value]) => `${key}: <span class="value">${value === null || value === "" ? "N/A" : value}</span>`
-                        )
-                        .
-                            join("<br>")
-                        }
-                    </div>
-                        `;
+                function formatAndDisplayCellData(data) {
+                    return data.map(cell => {
+                        return `<div class="object-box">${Object.entries(cell)
+                            .map(([key, value]) => `${key}: <span class="value">${value === null || value === "" ? "N/A" : value}</span>`)
+                            .join("<br>")}</div>`;
                     }).join("");
                 }
 
@@ -516,8 +507,7 @@
 
                     const legendText = document.createElement('span');
                     legendText.className = 'legend-text';
-                    legendText.textContent = `
-                        Cell ${cell.cell_id} (${cell.type})`;
+                    legendText.textContent = `Cell ${cell.cell_id} (${cell.type})`;
 
                     legendItem.appendChild(colorBox);
                     legendItem.appendChild(legendText);
