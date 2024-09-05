@@ -14,6 +14,8 @@ class SimulationManager:
 
     @classmethod
     def refresh_simulation(cls) -> Simulation:
+        if cls._simulation.number_of_ues == 0 and cls._simulation.number_of_cells == 0:
+            return cls._simulation
         simulation = cls.get_simulation()
         new_ues, new_cells = simulation.get_simulation_data(
             number_of_ues=simulation.number_of_ues,

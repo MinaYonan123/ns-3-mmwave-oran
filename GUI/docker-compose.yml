@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+
   gui:
     build:
       context: .
@@ -15,8 +16,7 @@ services:
       - INFLUXDB_PASSWORD=admin
       - INFLUXDB_PORT=8086
       - INFLUXDB_USERNAME=admin
-      - NS3_HOST=192.168.100.21
-
+      - NS3_HOST=10.254.10.227
 
   influxdb:
     image: influxdb:1.8-alpine
@@ -28,5 +28,20 @@ services:
       - ./:/imports
       - influxdb_data:/var/lib/influxdb
 
+  grafana:
+    image: grafana/grafana:8.0.2
+    depends_on:
+      - influxdb
+    env_file: configuration.env
+    links:
+      - influxdb
+    ports:
+      - '3000:3000'
+    command: sh -c "echo \"1,2,3\" > provacsv.csv"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - ./grafana/dashboards/:/var/lib/grafana/dashboards/
 volumes:
   influxdb_data: {}
+  grafana_data: {}

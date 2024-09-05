@@ -8,12 +8,13 @@ class Ue:
     x_position: float
     y_position: float
     type: str
-    connected_to: int
+    LTE_Cell: int
+    MMWave_Cell: int
     ErrTotalNbrDl: Optional[float] = None
     DRB_BufferSize_Qos: Optional[float] = None
     RRU_PrbUsedDl: Optional[float] = None
-    DRB_UEThpDlPdcpBased: Optional[float] = None
-    DRB_UEThpDl: Optional[float] = None
+    TP_Combined_PDCP_ENDC_kbps: Optional[float] = None
+    TP_Combined_RLC_ENDC_kbps: Optional[float] = None
     QosFlow_PdcpPduVolumeDl: Optional[float] = None
     TotNbrDlInitial: Optional[float] = None
     TotNbrDlInitial_16Qam: Optional[float] = None
@@ -21,13 +22,13 @@ class Ue:
     TotNbrDlInitial_Qpsk: Optional[float] = None
     TotNbrDl: Optional[float] = None
     PDCP_PDU_Volume: Optional[float] = None
-    Cell_PDCP_Latency: Optional[float] = None
+    PdcpSduDelayDl_ms_x_0_1: Optional[float] = None
     Qos_PDCP_PDU: Optional[float] = None
     PDCP_PDU: Optional[float] = None
-    PDCP_Throughput: Optional[float] = None
+    PDCP_Throughput_kbps: Optional[float] = None
     Tx_Bytes: Optional[float] = None
-    L3servingSINR: Optional[float] = None
+    L3servingSINR_dB: Optional[float] = None
     L3servingSINR_CellID: Optional[float] = None
-    L3neighSINR: Optional[float] = None
+    L3neighSINR_dB: Optional[float] = None
     L3neighSINR_CellId: Optional[float] = None
     DRB_Estab_Succ_5QI: Optional[float] = None
