@@ -420,12 +420,16 @@
 
                             let label = dataset.label || '';
                             if (dataPoint) {
-                                label += `\nID: ${dataPoint.ue_id}`;
+                                if (dataset.label === 'UEs') {
+                                    label += `\nID: ${dataPoint.ue_id}`;
+                                } else if (dataset.label === 'Cells') {
+                                    label += `\nID: ${dataPoint.cell_id}`;
+                                }
                                 label += `\nX: ${dataPoint.x.toFixed(1)}`;
                                 label += `\nY: ${dataPoint.y.toFixed(1)}`;
                                 if (dataset.label === 'UEs') {
                                     label += `\nType: ${dataPoint.type}`;
-                                    label += `\nConnected to Cell: ${dataPoint.connected_to || 'N/A'}`;
+                                    label += `\nConnected to Cell: ${dataPoint.MMWave_Cell || 'N/A'}`;
                                 } else if (dataset.label === 'Cells') {
                                     label += `\nType: ${dataPoint.type}`;
                                 }
