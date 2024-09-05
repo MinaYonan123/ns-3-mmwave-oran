@@ -378,9 +378,12 @@ static ns3::GlobalValue bandwidth_value ("Bandwidth", "Bandwidth Value",
 //                                       ns3::IntegerValue (1),
 //                                       ns3::MakeIntegerChecker<int> ());
 
-static ns3::GlobalValue interside_distance_value ("IntersideDistance", "Interside Distance Value",
+static ns3::GlobalValue interside_distance_value_ue ("IntersideDistanceUEs", "Interside Distance Value",
                                       ns3::DoubleValue (1000),
                                       ns3::MakeDoubleChecker<double> ());
+static ns3::GlobalValue interside_distance_value_cell ("IntersideDistanceCells", "Interside Distance Value",
+                                                  ns3::DoubleValue (1000),
+                                                  ns3::MakeDoubleChecker<double> ());
 
 int
 main(int argc, char *argv[]) {
@@ -549,8 +552,11 @@ main(int argc, char *argv[]) {
     GlobalValue::GetValueByName ("CenterFrequency", doubleValue);
     double centerFrequency = doubleValue.Get();
     // Distance between the mmWave BSs and the two co-located LTE and mmWave BSs in meters
-    GlobalValue::GetValueByName ("IntersideDistance", doubleValue);
-    double isd = doubleValue.Get(); // (interside distance)
+    GlobalValue::GetValueByName ("IntersideDistanceUEs", doubleValue);
+    double isd_ue = doubleValue.Get(); // (interside distance)
+    GlobalValue::GetValueByName ("IntersideDistanceCells", doubleValue);
+    double isd_cell = doubleValue.Get(); // (interside distance)
+
     // Number of antennas in each UE
     // GlobalValue::GetValueByName ("N_AntennasMcUe", uintegerValue);
     int numAntennasMcUe = 1; //uintegerValue.Get();
@@ -559,7 +565,7 @@ main(int argc, char *argv[]) {
     int numAntennasMmWave = 1; //uintegerValue.Get();
 
     NS_LOG_INFO("Bandwidth " << bandwidth << " centerFrequency " << double(centerFrequency)
-                             << " isd " << isd << " numAntennasMcUe " << numAntennasMcUe
+                             << " isd_ue " << isd_ue << " numAntennasMcUe " << numAntennasMcUe
                              << " numAntennasMmWave " << numAntennasMmWave);
 
     // Set the number of antennas in the devices
@@ -585,7 +591,7 @@ main(int argc, char *argv[]) {
     //uint8_t nUeNodes = ues * nMmWaveEnbNodes;
     uint8_t nUeNodes = ues;
     NS_LOG_INFO(" Bandwidth " << bandwidth << " centerFrequency " << double(centerFrequency)
-                              << " isd " << isd << " numAntennasMcUe " << numAntennasMcUe
+                              << " isd_cell " << isd_cell << " numAntennasMcUe " << numAntennasMcUe
                               << " numAntennasMmWave " << numAntennasMmWave << " nMmWaveEnbNodes "
                               << unsigned(nMmWaveEnbNodes));
 
@@ -638,8 +644,8 @@ main(int argc, char *argv[]) {
 
     // This guarantee that each of the rest BSs is placed at the same distance from the two co-located in the center
     for (int8_t i = 0; i < nConstellation; ++i) {
-        x = isd * cos((2 * M_PI * i) / (nConstellation));
-        y = isd * sin((2 * M_PI * i) / (nConstellation));
+        x = isd_cell * cos((2 * M_PI * i) / (nConstellation));
+        y = isd_cell * sin((2 * M_PI * i) / (nConstellation));
         enbPositionAlloc->Add(Vector(centerPosition.x + x, centerPosition.y + y, 3));
     }
 
@@ -654,7 +660,7 @@ main(int argc, char *argv[]) {
 
     uePositionAlloc->SetX(centerPosition.x);
     uePositionAlloc->SetY(centerPosition.y);
-    uePositionAlloc->SetRho(isd);
+    uePositionAlloc->SetRho(isd_ue);
     Ptr <UniformRandomVariable> speed = CreateObject<UniformRandomVariable>();
     speed->SetAttribute("Min", DoubleValue(2.0));
     speed->SetAttribute("Max", DoubleValue(4.0));

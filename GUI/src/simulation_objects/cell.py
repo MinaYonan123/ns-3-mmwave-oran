@@ -18,6 +18,6 @@ class Cell:
     TotNbrDlInitial_64Qam: Optional[int] = None
     TotNbrDlInitial_Qpsk: Optional[int] = None
     TotNbrDl: Optional[int] = None
-    dlPrbUsage: Optional[float] = None
-    Cell_Average_Latency: Optional[float] = None
+    dlPrbUsage_percentage: Optional[float] = None
+    Cell_Average_Latency_ms_x_0_1: Optional[float] = None
     LTE_Cell_PDCP_Volume: Optional[float] = None

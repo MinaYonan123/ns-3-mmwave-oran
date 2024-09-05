@@ -47,12 +47,13 @@ class Simulation:
                 x_position=self.get_last_value_from_measurement(f'ue_position_x_{ue_id}'),
                 y_position=self.get_last_value_from_measurement(f'ue_position_y_{ue_id}'),
                 type=self.get_last_value_from_measurement(f'ue_position_type_{ue_id}'),
-                connected_to=int(self.get_last_value_from_measurement(f'ue_position_cell_{ue_id}') or 0),
+                MMWave_Cell=int(self.get_last_value_from_measurement(f'ue_position_cell_{ue_id}') or 0),
+                LTE_Cell=int(1),
                 ErrTotalNbrDl=self.get_last_value_from_measurement(f'ue_{ue_id}_tb.errtotalnbrdl.1.ueid'),
                 DRB_BufferSize_Qos=self.get_last_value_from_measurement(f'ue_{ue_id}_drb.buffersize.qos.ueid'),
                 RRU_PrbUsedDl=self.get_last_value_from_measurement(f'ue_{ue_id}_rru.prbuseddl'),
-                DRB_UEThpDlPdcpBased=self.get_last_value_from_measurement(f'ue_{ue_id}_drb.uethpdlpdcpbased.ueid'),
-                DRB_UEThpDl=self.get_last_value_from_measurement(f'ue_{ue_id}_drb.uethpdl.ueid'),
+                TP_Combined_PDCP_ENDC_kbps=self.get_last_value_from_measurement(f'ue_{ue_id}_drb.uethpdlpdcpbased.ueid'),
+                TP_Combined_RLC_ENDC_kbps=self.get_last_value_from_measurement(f'ue_{ue_id}_drb.uethpdl.ueid'),
                 QosFlow_PdcpPduVolumeDl=self.get_last_value_from_measurement(
                     f'ue_{ue_id}_qosflow.pdcppduvolumedl_filter'),
                 TotNbrDlInitial=self.get_last_value_from_measurement(f'ue_{ue_id}_tb.totnbrdlinitial'),
@@ -62,17 +63,17 @@ class Simulation:
                 TotNbrDl=self.get_last_value_from_measurement(f'ue_{ue_id}_tb.totnbrdl.1.ueid'),
                 PDCP_PDU_Volume=self.get_last_value_from_measurement(
                     f'ue_{ue_id}_qosflow_pdcppduvolumedl_filter_ueid(txpdcppdubytesnrrlc)'),
-                Cell_PDCP_Latency=self.get_last_value_from_measurement(
+                PdcpSduDelayDl_ms_x_0_1=self.get_last_value_from_measurement(
                     f'ue_{ue_id}_drb.pdcpsdudelaydl.ueid(pdcp latency)'),
                 Qos_PDCP_PDU=self.get_last_value_from_measurement(
                     f'ue_{ue_id}_drb_pdcppdunbrdl_qos_ueid(txpdcppdunrrlc)'),
                 PDCP_PDU=self.get_last_value_from_measurement(f'ue_{ue_id}_tot_pdcpsdunbrdl_ueid(txdlpackets)'),
-                PDCP_Throughput=self.get_last_value_from_measurement(
+                PDCP_Throughput_kbps=self.get_last_value_from_measurement(
                     f'ue_{ue_id}_drb.pdcpsdubitratedl.ueid(pdcpthroughput)'),
                 Tx_Bytes=self.get_last_value_from_measurement(f'ue_{ue_id}_drb.pdcpsduvolumedl_filter.ueid(txbytes)'),
-                L3servingSINR=self.get_last_value_from_measurement(f'ue_{ue_id}_l3 serving sinr'),
+                L3servingSINR_dB=self.get_last_value_from_measurement(f'ue_{ue_id}_l3 serving sinr'),
                 L3servingSINR_CellID=self.get_last_value_from_measurement(f'ue_position_cell_{ue_id}'),
-                L3neighSINR=self.get_max_value_from_multiple_measurements(f'ue_{ue_id}_l3 neigh sinr ', 8),
+                L3neighSINR_dB=self.get_max_value_from_multiple_measurements(f'ue_{ue_id}_l3 neigh sinr ', 8),
                 L3neighSINR_CellId=self.get_max_value_from_multiple_measurements(
                     f'ue_{ue_id}_l3 neigh id ',
                     8,
@@ -101,8 +102,8 @@ class Simulation:
                 TotNbrDlInitial_Qpsk=self.get_last_value_from_measurement(
                     f'du-cell-{cell_id}_tb.totnbrdlinitial.qpsk.ueid'),
                 TotNbrDl=self.get_last_value_from_measurement(f'du-cell-{cell_id}_tb.totnbrdl.1.ueid'),
-                dlPrbUsage=self.get_last_value_from_measurement(f'du-cell-{cell_id}_dlprbusage'),
-                Cell_Average_Latency=self.get_last_value_from_measurement(
+                dlPrbUsage_percentage=self.get_last_value_from_measurement(f'du-cell-{cell_id}_dlprbusage'),
+                Cell_Average_Latency_ms_x_0_1=self.get_last_value_from_measurement(
                     f'cu-up-cell-{cell_id}_drb.pdcpsdudelaydl (cellaveragelatency)'),
                 LTE_Cell_PDCP_Volume=self.get_last_value_from_measurement(
                     f'cu-up-cell-{cell_id}_m_pdcpbytesdl (celldltxvolume)'),

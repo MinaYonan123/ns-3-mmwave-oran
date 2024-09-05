@@ -227,27 +227,66 @@
             -moz-appearance: textfield;
         }
 
+        #loading-icon {
+            display: none;
+            color: #ff8c00;
+            font-size: 24px;
+        }
+
+        #simulationForm button {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background: #ff8c00;
+            color: #1a1a1a;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        #simulationForm button:active {
+            background: #e07b00;
+        }
+
+        #simulationForm button:disabled {
+            background: #4d4d4d;
+            color: #7a7a7a;
+            cursor: not-allowed;
+        }
+
+
     </style>
 </head>
 <body>
 <div id="main-container">
-    <button id="form-toggle-button">Show Form</button>
+    <button id="form-toggle-button">Show simulation setup</button>
     <div id="form-container">
         <form id="simulationForm">
             <div>
-                <label for="e2TermIp">e2TermIp:</label>
-                <input type="text" id="e2TermIp" name="e2TermIp" value="127.0.0.1">
+                <div style="display: flex; flex-direction: column;">
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <label for="flexric">Connect to FlexRIC: (If true, FlexRIC need to be running) </label>
+                        <input type="checkbox" id="flexric" name="flexric" value="true"
+                               style="transform: scale(1.5); margin-left: 0;">
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <label for="e2TermIp" style="margin-right: 8px; width: 100px;">e2TermIp:</label>
+                        <input type="text" id="e2TermIp" name="e2TermIp" value="127.0.0.1" disabled
+                               style="flex: 1; background-color: lightgray;">
+                    </div>
+                </div>
+
             </div>
             <div>
-                <label for="hoSinrDifference">hoSinrDifference:</label>
+                <label for="hoSinrDifference">hoSinrDifference (dB):</label>
                 <input type="number" id="hoSinrDifference" name="hoSinrDifference" value="3" step="">
             </div>
             <div>
-                <label for="indicationPeriodicity">indicationPeriodicity:</label>
+                <label for="indicationPeriodicity">indicationPeriodicity (s):</label>
                 <input type="number" id="indicationPeriodicity" name="indicationPeriodicity" value="0.1" step="">
             </div>
             <div>
-                <label for="simTime">simTime:</label>
+                <label for="simTime">simTime (s):</label>
                 <input type="number" id="simTime" name="simTime" value="1000">
             </div>
             <div>
@@ -287,23 +326,24 @@
                 <input type="number" id="N_AntennasMmWave" name="N_AntennasMmWave" value="">
             </div> -->
             <div>
-                <label for="IntersideDistance">IntersideDistance:</label>
-                <input type="number" id="IntersideDistance" name="IntersideDistance" value="1000">
+                <label for="IntersideDistanceUEs">IntersideDistanceUEs (m):</label>
+                <input type="number" id="IntersideDistanceUEs" name="IntersideDistanceUEs" value="1000">
             </div>
             <div>
-
-
+                <label for="IntersideDistanceCells">IntersideDistanceCells (m):</label>
+                <input type="number" id="IntersideDistanceCells" name="IntersideDistanceCells" value="1000">
             </div>
-
-            <button type="button" onclick="sendForm('/start_simulation')">Start</button>
-            <button type="button" onclick="sendForm('/stop_simulation')">Stop</button>
-            <div></div>
-            <button type="button" onclick="sendForm('/reset_simulation')">Reset</button>
+            <button type="button" onclick="sendForm('/start_simulation')" id="start_button">Start</button>
+            <button type="button" onclick="stopSim('/stop_simulation')" id="stop_button" disabled>Stop</button>
+            <div>
+                <label>Status: </label>
+                <label id="status_label" style="text-align: center">off</label></div>
+            <button type="button" onclick="resetSim('/reset_simulation')" id="reset_button" disabled>Reset</button>
         </form>
     </div>
     <div id="tab-container">
-        <div id="chart-tab" class="tab-button active">Chart View</div>
-        <div id="data-tab" class="tab-button">Source Data</div>
+        <div id="chart-tab" class="tab-button active">Observe simulation grid</div>
+        <div id="data-tab" class="tab-button">Observe KPIs</div>
     </div>
     <div id="chart-content" class="tab-content active">
         <canvas id="myChart"></canvas>
@@ -326,6 +366,18 @@
 </div>
 
 <script>
+    document.getElementById('flexric').addEventListener('change', function () {
+        var e2TermIpField = document.getElementById('e2TermIp');
+        if (this.checked) {
+            e2TermIpField.disabled = false;
+            e2TermIpField.style.backgroundColor = "";
+        } else {
+            e2TermIpField.disabled = true;
+            e2TermIpField.value = "127.0.0.1";
+            e2TermIpField.style.backgroundColor = "lightgray";
+        }
+    });
+
     const cellColors = [
         '#1f77b4', '#9467bd', '#2ca02c', '#d62728', '#ff7f0e',
         '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
@@ -425,7 +477,7 @@
                                 label += `\nY: ${dataPoint.y.toFixed(1)}`;
                                 if (dataset.label === 'UEs') {
                                     label += `\nType: ${dataPoint.type}`;
-                                    label += `\nConnected to Cell: ${dataPoint.connected_to || 'N/A'}`;
+                                    label += `\nConnected to Cell: ${dataPoint.MMWave_Cell || 'N/A'}`;
                                 } else if (dataset.label === 'Cells') {
                                     label += `\nType: ${dataPoint.type}`;
                                 }
@@ -444,49 +496,55 @@
 
     function updateChart() {
         fetch('/refresh-data')
-            .then(response => response.json())
-            .then(data => {
-                const cellColorMap = new Map(data.cells.map((cell, index) => [
-                    cell.cell_id, cellColors[index % cellColors.length]
-                ]));
+                .then(response => response.json())
+                .then(data => {
+                    const cellColorMap = new Map(data.cells.map((cell, index) => [
+                        cell.cell_id, cellColors[index % cellColors.length]
+                    ]));
 
-                const cellData = data.cells.map(cell => ({
-                    x: cell.x_position,
-                    y: cell.y_position,
-                    cell_id: cell.cell_id,
-                    type: cell.type,
-                    backgroundColor: cellColorMap.get(cell.cell_id),
-                    pointStyle: cell.type === 'lte' ? 'rect' : 'triangle'
-                }));
+                    const cellData = data.cells.map(cell => ({
+                        x: cell.x_position,
+                        y: cell.y_position,
+                        cell_id: cell.cell_id,
+                        type: cell.type,
+                        backgroundColor: cellColorMap.get(cell.cell_id),
+                        pointStyle: cell.type === 'lte' ? 'rect' : 'triangle'
+                    }));
 
-                const ueData = data.ues.map(ue => ({
-                    x: ue.x_position,
-                    y: ue.y_position,
-                    ue_id: ue.ue_id,
-                    type: ue.type,
-                    connected_to: ue.connected_to,
-                    backgroundColor: cellColorMap.get(ue.connected_to)
-                }));
+                    const ueData = data.ues.map(ue => ({
+                        x: ue.x_position,
+                        y: ue.y_position,
+                        ue_id: ue.ue_id,
+                        type: ue.type,
+                        MMWave_Cell: ue.MMWave_Cell,
+                        LTE_Cell: ue.LTE_Cell,
+                        backgroundColor: cellColorMap.get(ue.MMWave_Cell)
+                    }));
 
-                myChart.data.datasets[0].data = ueData;
-                myChart.data.datasets[0].backgroundColor = ueData.map(ue => ue.backgroundColor);
-                myChart.data.datasets[1].data = cellData;
-                myChart.data.datasets[1].backgroundColor = cellData.map(cell => cell.backgroundColor);
-                myChart.data.datasets[1].pointStyle = cellData.map(cell => cell.pointStyle);
+                    myChart.data.datasets[0].data = ueData;
+                    myChart.data.datasets[0].backgroundColor = ueData.map(ue => ue.backgroundColor);
+                    myChart.data.datasets[1].data = cellData;
+                    myChart.data.datasets[1].backgroundColor = cellData.map(cell => cell.backgroundColor);
+                    myChart.data.datasets[1].pointStyle = cellData.map(cell => cell.pointStyle);
 
-                var chartDimensions = data.max_x_max_y;
-                myChart.options.scales.x.min = 0;
-                myChart.options.scales.x.max = chartDimensions[0];
-                myChart.options.scales.y.min = 0;
-                myChart.options.scales.y.max = chartDimensions[1];
+                    var chartDimensions = data.max_x_max_y;
+                    myChart.options.scales.x.min = 0;
+                    myChart.options.scales.x.max = chartDimensions[0];
+                    myChart.options.scales.y.min = 0;
+                    myChart.options.scales.y.max = chartDimensions[1];
 
-                myChart.update();
+                    myChart.update();
 
-                function formatAndDisplayCellData(data) {
-                    return data.map(cell => {
-                        return `<div class="object-box">${Object.entries(cell)
-                            .map(([key, value]) => `${key}: <span class="value">${value === null || value === "" ? "N/A" : value}</span>`)
-                            .join("<br>")}</div>`;
+                    function formatAndDisplayCellData(data) {
+                        return data.map(cell => {
+                            return `<div class="object-box">${Object.entries(cell)
+                                    .map(([key, value]) => `${key}: <span class="value">${value === null || value === "" ? "N/A" : value}</span>`
+                        )
+                        .
+                            join("<br>")
+                        }
+                    </div>
+                        `;
                     }).join("");
                 }
 
@@ -507,7 +565,8 @@
 
                     const legendText = document.createElement('span');
                     legendText.className = 'legend-text';
-                    legendText.textContent = `Cell ${cell.cell_id} (${cell.type})`;
+                    legendText.textContent = `
+                        Cell ${cell.cell_id} (${cell.type})`;
 
                     legendItem.appendChild(colorBox);
                     legendItem.appendChild(legendText);
@@ -532,10 +591,10 @@
 
         if (formContainer.style.display === 'none' || formContainer.style.display === '') {
             formContainer.style.display = 'block';
-            button.textContent = 'Hide Form';
+            button.textContent = 'Hide simulation setup';
         } else {
             formContainer.style.display = 'none';
-            button.textContent = 'Show Form';
+            button.textContent = 'Show simulation setup';
         }
     });
 
@@ -560,7 +619,7 @@
         event.preventDefault();
     });
 
-    setInterval(updateChart, 2500);
+    setInterval(updateChart, 1250);
     updateChart();
 
     function sendForm(endpoint) {
@@ -569,12 +628,19 @@
         const data = {};
 
         formData.forEach((value, key) => {
-            if (value.trim() !== '') {  // Check for non-empty values
+            if (value.trim() !== '') {
                 data[key] = value;
             }
         });
 
-        console.log('Data to be sent:', data); // Log the data to be sent
+        console.log('Data to be sent:', data);
+        const statusLabel = document.getElementById('status_label');
+        const startButton = document.getElementById('start_button')
+        const stopButton = document.getElementById('stop_button')
+        statusLabel.textContent = 'Simulation starting';
+        startButton.disabled = true
+        stopButton.disabled = false
+
 
         fetch(endpoint, {
             method: 'POST',
@@ -591,9 +657,73 @@
             })
             .then(data => {
                 console.log('Success:', data);
+statusLabel.textContent = 'Simulation running (if there are no Cells/UEs on the grid after max 30s, please check if ns3 is running properly typing in terminal "ps -a" or "cat ns-3-mmwave-oran/ns3_run.log")';
             })
             .catch((error) => {
                 console.error('Error:', error);
+                statusLabel.textContent = 'Error while starting up the simulation';
+                startButton.disabled = false
+                stopButton.disabled = true
+            });
+    }
+
+    function stopSim(endpoint) {
+        const statusLabel = document.getElementById('status_label');
+        statusLabel.textContent = 'Stopping simulation';
+        const startButton = document.getElementById('start_button')
+        const stopButton = document.getElementById('stop_button')
+        const resetButton = document.getElementById('reset_button')
+        startButton.disabled = false
+        stopButton.disabled = true
+        resetButton.disabled = false
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                statusLabel.textContent = 'Simulation stopped';
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                statusLabel.textContent = 'Error encountered while stopping the simulation';
+
+            });
+    }
+
+    function resetSim(endpoint) {
+        const statusLabel = document.getElementById('status_label');
+        statusLabel.textContent = 'Resetting simulation';
+        const resetButton = document.getElementById('reset_button')
+        resetButton.disabled = true
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                statusLabel.textContent = 'off';
+
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                statusLabel.textContent = 'Error encountered while resetting the simulation';
             });
     }
 
