@@ -79,7 +79,8 @@ namespace ns3 {
 * \param pdu request message
 */
     void
-    LteEnbNetDevice::KpmSubscriptionCallback(E2AP_PDU_t *sub_req_pdu) {
+    LteEnbNetDevice::KpmSubscriptionCallback(E2AP_PDU_t *sub_req_pdu)
+    {
         NS_LOG_DEBUG("\nReceived RIC Subscription Request, cellId = " << m_cellId << "\n");
 
         E2Termination::RicSubscriptionRequest_rval_s params = m_e2term->ProcessRicSubscriptionRequest(sub_req_pdu);

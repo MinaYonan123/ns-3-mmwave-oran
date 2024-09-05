@@ -592,7 +592,9 @@ MmWaveEnbNetDevice::SetE2Termination (Ptr<E2Termination> e2term)
 {
   m_e2term = e2term;
 
-  if (!m_forceE2FileLogging || m_e2andlog)
+  NS_LOG_DEBUG ("Register E2SM MmWaveEnbNetDevice");
+
+  if (!m_forceE2FileLogging)
     {
       long m_e2_func_id = long (e2_func_id);
       Ptr<KpmFunctionDescription> kpmFd = Create<KpmFunctionDescription> ();
@@ -977,6 +979,7 @@ MmWaveEnbNetDevice::BuildRicIndicationMessageCuCp (std::string plmId)
       // Fill CuCp specific fields
       indicationMessageHelper->FillCuCpValues (ueMap.size ()); // Number of Active UEs
     }
+
   if (m_forceE2FileLogging)
     {
       std::ofstream csv{};
