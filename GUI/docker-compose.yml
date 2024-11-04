@@ -42,6 +42,15 @@ services:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
       - ./grafana/dashboards/:/var/lib/grafana/dashboards/
+
+  a1mediator:
+    build:
+      context: ./A1_Mediator
+    ports:
+      - '9000:9000'
+    depends_on:
+      - influxdb
+
 volumes:
   influxdb_data: {}
   grafana_data: {}
