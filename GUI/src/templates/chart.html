@@ -32,6 +32,10 @@
             box-sizing: border-box;
         }
 
+        #form-buttons {
+            margin: 0 auto;
+        }
+
         #form-container {
             display: none;
             background: #1a1a1a;
@@ -116,14 +120,45 @@
         }
 
         #chart-content canvas {
-            width: 100% !important;
-            height: 100% !important;
+            width: 100%;
+            height: 100%;
             max-height: 80vh;
             max-width: 100%;
         }
 
         #data-content {
             flex: 1.2;
+        }
+
+        #es-content {
+            flex: 1.2;
+        }
+
+        .es-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            height: 100%;
+        }
+
+        .es_charts_left {
+            flex: 85;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .es_charts_right {
+            flex: 15;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .es_subchart_div {
+            height: 220px;
         }
 
         .data-container {
@@ -140,7 +175,6 @@
             display: flex;
             flex-direction: column;
         }
-
 
         h3 {
             text-align: center;
@@ -166,11 +200,9 @@
             box-sizing: border-box;
         }
 
-
         .value {
             color: lightblue;
         }
-
 
         .custom-legend.horizontal {
             display: flex;
@@ -254,12 +286,198 @@
             cursor: not-allowed;
         }
 
+        #toggleButton {
+            background: #ff8c00;
+            color: #1a1a1a;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 10px;
+
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 10px;
+            background-color: black;
+            color: white;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+
+        .row-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .label-row,
+        .input-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .label-row label {
+            font-family: "Arial", sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .label-row label,
+        .input-row input {
+            flex: 1;
+            text-align: left;
+        }
+
+        .input-row input {
+            padding: 10px;
+            font-size: 14px;
+            color: #ff8c00;
+            background: #333;
+            border: none;
+            font-family: "Arial", sans-serif;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .button-row button {
+            flex: 1;
+            padding: 10px 15px;
+            cursor: pointer;
+            background: #ff8c00;
+            color: #1a1a1a;
+            border: none
+        }
+
+
+        .button-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .button-row button {
+            flex: 1;
+            padding: 10px 15px;
+            cursor: pointer;
+            background: #ff8c00;
+            color: #1a1a1a;
+            border: none
+        }
+
+        .button-row-post {
+            display: flex;
+            gap: 20px;
+        }
+
+        .button-row-post button {
+            flex: 1;
+            padding: 10px 15px;
+            cursor: pointer;
+            background: orange;
+            color: black;
+            border: none;
+            font-family: "Arial", sans-serif;
+            font-weight: bold;
+        }
+
+        .button-row-get {
+            display: flex;
+            gap: 20px;
+        }
+
+        .button-row-get button {
+            flex: 1;
+            padding: 10px 15px;
+            cursor: pointer;
+            background: dodgerblue;
+            color: black;
+            border: none;
+            font-family: "Arial", sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .frame-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .response-frame {
+            flex: 1;
+            padding: 10px;
+            background-color: #333;
+            min-height: 100px;
+            text-align: left;
+            word-wrap: break-word;
+            border: none;
+            font-family: "Arial", sans-serif;
+            font-size: 14px;
+            color: white;
+        }
+
+        .put-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .put-row label {
+            font-weight: bold;
+        }
+
+        .put-row input,
+        .put-row textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            box-sizing: border-box;
+            color: #ff8c00;
+            background: #333;
+            border: none;
+            font-family: "Arial", sans-serif;
+        }
+
+        .put-row button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .space_in_form {
+            height: 5px;
+            width: 110%;
+            background-color: #ff8c00;
+        }
+
+        .last_space_in_form {
+            height: 5px;
+            background-color: #ff8c00;
+        }
     </style>
 </head>
 <body>
 <div id="main-container">
-    <button id="form-toggle-button">Show simulation setup</button>
+    <div id="form-buttons">
+        <button id="form-toggle-button">Show simulation setup</button>
+        <button id="toggleButton">Show A1 policy manager</button>
+    </div>
     <div id="form-container">
         <form id="simulationForm">
             <div>
@@ -275,7 +493,6 @@
                                style="flex: 1; background-color: lightgray;">
                     </div>
                 </div>
-
             </div>
             <div>
                 <label for="hoSinrDifference">hoSinrDifference (dB):</label>
@@ -333,17 +550,139 @@
                 <label for="IntersideDistanceCells">IntersideDistanceCells (m):</label>
                 <input type="number" id="IntersideDistanceCells" name="IntersideDistanceCells" value="1000">
             </div>
-            <button type="button" onclick="sendForm('/start_simulation')" id="start_button">Start</button>
-            <button type="button" onclick="stopSim('/stop_simulation')" id="stop_button" disabled>Stop</button>
             <div>
                 <label>Status: </label>
-                <label id="status_label" style="text-align: center">off</label></div>
-            <button type="button" onclick="resetSim('/reset_simulation')" id="reset_button" disabled>Reset</button>
+                <label id="status_label" style="text-align: center">off </label>
+                <label id="label_between_status_and_simid"></label>
+                <label id="simid_label" style="text-align: center; color: white"></label>
+            </div>
+            <button type="button" onclick="sendForm('/start_simulation')" id="start_button">Start new</button>
+            <button type="button" onclick="stopSim('/stop_simulation')" id="stop_button" disabled>Stop</button>
+            <button type="button" onclick="resetSim('/reset_simulation')" id="reset_button">Reset</button>
+            <div><label id="warning_label"></label></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div class="space_in_form"></div>
+            <div class="space_in_form"></div>
+            <div class="space_in_form"></div>
+            <div class="last_space_in_form"></div>
+            <div>
+                <label style="font-size: 30px; font-weight: bold">Cell energy states management: </label>
+            </div>
+            <div>
+                <center>
+                    <label>ES status: </label>
+                    <label id="es_status_label">off</label>
+                </center>
+            </div>
+            <button type="button" onclick="startEs()" style="background-color: green" id="set_es_button">Turn ES xApp
+                on
+            </button>
+            <button type="button" onclick="stopEs()" style="background-color: olive" id="set_es_button">Turn ES xApp
+                off
+            </button>
         </form>
+    </div>
+    <div id="frameContainer" class="hidden">
+        <div class="container">
+            <!-- GET Inputs and Buttons Row -->
+            <div class="row-container">
+                <div class="label-row">
+                    <label for="param1">policy_type_id:</label>
+                </div>
+                <div class="input-row">
+                    <input id="param1" placeholder="Enter policy_type_id to fetch or create:"/>
+                </div>
+                <div class="label-row">
+                    <label for="param2">policy_instance_id:</label>
+                </div>
+                <div class="input-row">
+                    <input id="param2" placeholder="Enter policy_instance_id to fetch or create:"/>
+                </div>
+            </div>
+            <div class="button-row-get">
+                <button id="fetchData1" class="blue-button">GET policy_type_id list</button>
+                <button id="fetchData2" class="blue-button">GET JSON body of policy_type_id from "policy_type_id:"
+                    field
+                </button>
+                <button id="fetchData3" class="blue-button">GET policy_instance_id list</button>
+                <button id="fetchData4" class="blue-button">GET JSON body of policy_instance_id from "policy_instance_id
+                    id:" field
+                </button>
+            </div>
+
+            <!-- GET Response Frames Row -->
+            <div class="frame-row">
+                <div id="response1" class="response-frame">Return current policy_type_id list.</div>
+                <div id="response2" class="response-frame">Return JSON body of chosen policy_type_id.<br>
+                    "policy_type_id:" must be fulfilled.
+                </div>
+                <div id="response3" class="response-frame">Return current policy_instance_id list.<br> "policy_type_id:"
+                    must be fulfilled.
+                </div>
+                <div id="response4" class="response-frame">Return JSON body of chosen policy_instance_id. <br>
+                    "policy_type_id:" and "policy_instance_id:" must be fulfilled.
+                </div>
+            </div>
+            <div class="put-row">
+                <textarea id="putJson1" placeholder="Enter JSON payload for new policy_type_id creation:"></textarea>
+                <textarea id="putJson2"
+                          placeholder="Enter JSON payload for new policy_instance_id creation:"></textarea>
+            </div>
+
+            <!-- PUT Rows -->
+            <div class="button-row-post">
+                <button id="sendPut1">PUT policy_type_id (with id from field "policy_type_id:" and JSON body inputed
+                    above)
+                </button>
+                <button id="sendPut2">PUT policy_instance_id (with id from field "policy_instance_id:" and JSON body
+                    inputed above)
+                </button>
+            </div>
+            <div class="frame-row">
+                <div id="putResponse1" class="response-frame">
+                    <span style="color: orange;">Example policy_type_id JSON payload: </span><br>
+                    <pre>
+{
+    "name": "es_policy",
+    "description": "Simplified - O-RAN standard Energy saving policy",
+    "policy_type_id": 10000,
+    "create_schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+            "cellID": {
+                "type": "integer",
+                "default": 0
+            },
+            "ES_State": {
+                "type": "bool",
+                "default": false
+            }
+        },
+        "additionalProperties": false
+    }
+}
+    </pre>
+                </div>
+                <div id="putResponse2" class="response-frame">
+                    <span style="color: orange;">Example policy_instance_id JSON payload:</span> <br>
+                    <pre>
+    {
+        "cellID": 10,
+        "ES_State": true
+    }
+    </pre>
+                </div>
+
+            </div>
+        </div>
     </div>
     <div id="tab-container">
         <div id="chart-tab" class="tab-button active">Observe simulation grid</div>
         <div id="data-tab" class="tab-button">Observe KPIs</div>
+        <div id="es-tab" class="tab-button">Observe ES</div>
     </div>
     <div id="chart-content" class="tab-content active">
         <canvas id="myChart"></canvas>
@@ -361,11 +700,38 @@
             </div>
         </div>
     </div>
+    <div id="es-content" class="tab-content">
+        <div class="data-container">
+            <div class="es_charts_left">
+                <div class="es_subchart_div" style="height: 140px">
+                    <canvas id="es-mode-chart"></canvas>
+                </div>
+                <div class="es_subchart_div">
+                    <canvas id="sinr-chart"></canvas>
+                </div>
+                <div class="es_subchart_div">
+                    <canvas id="retx-chart"></canvas>
+                </div>
+                <div class="es_subchart_div">
+                    <canvas id="prb-usage-chart"></canvas>
+                </div>
+                <div style="display: flex; justify-content: center; align-items: center; text-align: center;">
+                    <label style="font-size: 20px; font-weight: bold; color: white;">
+                        Dots on plot represent UEs cell allocation (DOT color = CELL color), line colors represent
+                        unique UEs
+                    </label>
+                </div>
+            </div>
+            <div class="es_charts_right">
+                <canvas id="es_diff"></canvas>
+            </div>
 
-
+        </div>
+    </div>
 </div>
 
 <script>
+    const host_ns3 = "{{ host_ns3 }}";
     document.getElementById('flexric').addEventListener('change', function () {
         var e2TermIpField = document.getElementById('e2TermIp');
         if (this.checked) {
@@ -378,10 +744,6 @@
         }
     });
 
-    const cellColors = [
-        '#1f77b4', '#9467bd', '#2ca02c', '#d62728', '#ff7f0e',
-        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
-    ];
 
     var ctx = document.getElementById('myChart').getContext('2d');
 
@@ -506,13 +868,358 @@
         plugins: [ChartDataLabels]
     });
 
+    const ctx2 = document.getElementById('es_diff').getContext('2d');
+
+
+    const actualEsChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value, index, values) {
+                            return this.getLabelForValue(value).split('\n');
+                        },
+                        maxRotation: 0,
+                        minRotation: 0,
+                        padding: 10,
+                        color: '#FFFFFF',
+                        font: {
+                            size: 10
+                        },
+                    },
+                },
+                y: {
+                    beginAtZero: true
+                },
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Difference in power consumption between modes',
+                    color: '#FFFFFF',
+                    font: {
+                        size: 16
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: 10
+                    },
+                    align: 'center'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (tooltipItem) {
+                            return tooltipItem.raw;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+
+    const ctx3 = document.getElementById('es-mode-chart').getContext('2d');
+    const ctx4 = document.getElementById('sinr-chart').getContext('2d');
+    const ctx5 = document.getElementById('retx-chart').getContext('2d');
+    const ctx6 = document.getElementById('prb-usage-chart').getContext('2d');
+
+    const es_mode_chart = new Chart(ctx3, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 51}, (_, i) => -50 + i),
+
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Timeline',
+                        color: '#ff8c00',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    },
+                    ticks: {
+                        color: '#ff8c00'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'ES MODE',
+                        color: '#ff8c00',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    },
+                    min: 0,
+                    max: 1,
+                    ticks: {
+                        stepSize: 1,
+                        color: '#ff8c00'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#ff8c00'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `Cell ${context.dataset.cell_id}: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const sinr_chart = new Chart(ctx4, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 51}, (_, i) => -50 + i),
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Timeline',
+                        color: '#ff8c00',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    },
+                    ticks: {
+                        color: '#ff8c00'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Serving SINR',
+                        color: '#ff8c00',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    },
+                    ticks: {
+                        color: '#ff8c00'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#ff8c00'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `UE ${context.dataset.ueid}: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const retx_chart = new Chart(ctx5, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 51}, (_, i) => -50 + i),
+
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Timeline',
+                        color: '#ff8c00',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    },
+                    ticks: {
+                        color: '#ff8c00'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'RETX',
+                        color: '#ff8c00',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    },
+                    ticks: {
+                        color: '#ff8c00'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#ff8c00'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `UE ${context.dataset.ueid}: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const prb_usage_chart = new Chart(ctx6, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 51}, (_, i) => -50 + i),
+
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Timeline',
+                        color: '#ff8c00',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    },
+                    ticks: {
+                        color: '#ff8c00'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'PRB usage',
+                        color: '#ff8c00',
+                        font: {
+                            size: 14
+                        }
+                    },
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)'
+                    },
+                    ticks: {
+                        color: '#ff8c00'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#ff8c00'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return `Cell ${context.dataset.cell_id}: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
     function updateChart() {
         fetch('/refresh-data')
                 .then(response => response.json())
                 .then(data => {
+
+                    const cellColors = [
+                        '#1f77b4', '#9467bd', '#2ca02c', '#d62728', '#ff7f0e',
+                        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
+                        '#9e4f96', '#e57373', '#66c2a5', '#ffcc00', '#b3b3b3',
+                        '#ff1f7a', '#6b5b95', '#4daf4a', '#f4b400', '#4e73df'
+                    ];
+
+                    const ueColors = [
+                        '#f39c12', '#8e44ad', '#e74c3c', '#2ecc71', '#3498db',
+                        '#9b59b6', '#34495e', '#f1c40f', '#1abc9c', '#d35400',
+                        '#8e44ad', '#27ae60', '#2980b9', '#16a085', '#e67e22',
+                        '#f7b7a3', '#c0392b', '#9b59b6', '#e91e63', '#f44336'
+                    ];
+
                     const cellColorMap = new Map(data.cells.map((cell, index) => [
                         cell.cell_id, cellColors[index % cellColors.length]
                     ]));
+
+                    const ueColorMap = new Map(data.ues.map((ue, index) => [
+                        ue.ue_id, cellColors[index % ueColors.length]
+                    ]));
+
+                    const simIdLabel = document.getElementById('simid_label');
+                    const joinLabel = document.getElementById('label_between_status_and_simid')
+                    if (data.sim_id != 'off') {
+                        joinLabel.textContent = ', simulation id = '
+                        simIdLabel.textContent = data.sim_id;
+                    } else {
+                        joinLabel.textContent = ''
+                        simIdLabel.textContent = '';
+                    }
 
                     const cellData = data.cells.map(cell => ({
                         x: cell.x_position,
@@ -538,7 +1245,6 @@
                     myChart.data.datasets[1].data = cellData;
                     myChart.data.datasets[1].backgroundColor = cellData.map(cell => cell.backgroundColor);
                     myChart.data.datasets[1].pointStyle = cellData.map(cell => cell.pointStyle);
-
                     var chartDimensions = data.max_x_max_y;
                     myChart.options.scales.x.min = 0;
                     myChart.options.scales.x.max = chartDimensions[0];
@@ -547,60 +1253,197 @@
 
                     myChart.update();
 
-                    function formatAndDisplayCellData(data) {
-                        return data.map(cell => {
-                            return `<div class="object-box">${Object.entries(cell)
-                                    .map(([key, value]) => `${key}: <span class="value">${value === null || value === "" ? "N/A" : value}</span>`
-                        )
-                        .
-                            join("<br>")
+                    if (data.simulation_status === 'off') {
+                        return;
+                    }
+                    const esState = data.es_state;
+                    Object.keys(esState).forEach(cellId => {
+                        const intCellId = parseInt(cellId, 10);
+                        let dataset = es_mode_chart.data.datasets.find(d => d.label === `Cell ${cellId}`);
+                        if (!dataset) {
+                            dataset = {
+                                label: `Cell ${cellId}`,
+                                cell_id: intCellId,
+                                data: Array(es_mode_chart.data.labels.length).fill(0),
+                                backgroundColor: cellColorMap.get(intCellId),
+                                borderColor: cellColorMap.get(intCellId),
+                                borderWidth: 2,
+                                fill: false
+                            };
+                            es_mode_chart.data.datasets.push(dataset);
                         }
-                    </div>
-                        `;
-                    }).join("");
-                }
 
-                document.getElementById('ueSourceData').innerHTML = formatAndDisplayCellData(data.ues);
-                document.getElementById('cellSourceData').innerHTML = formatAndDisplayCellData(data.cells);
+                        const currentValue = esState[cellId] !== null && esState[cellId] !== undefined ? esState[cellId] : 0;
+                        dataset.data.push(currentValue);
+                        if (dataset.data.length > es_mode_chart.data.labels.length) {
+                            dataset.data.shift();
+                        }
+                    });
+                    es_mode_chart.update();
+
+                    const sinr = data.sinr;
+                    Object.keys(sinr).forEach(ueId => {
+                        const intUeId = parseInt(ueId, 10);
+                        let dataset = sinr_chart.data.datasets.find(d => d.label === `Ue ${ueId}`);
+                        const ue = data.ues.find(ue => parseInt(ue.ue_id, 10) === intUeId);
+                        const serv_cell_id = parseInt(ue.L3servingSINR_CellID, 10);
+                        const cellColor = cellColorMap.get(serv_cell_id) || 'black';
+                        if (!dataset) {
+                            dataset = {
+                                label: `Ue ${ueId}`,
+                                ueid: intUeId,
+                                data: Array(sinr_chart.data.labels.length).fill(0),
+                                backgroundColor: 'black',
+                                borderColor: Array(sinr_chart.data.labels.length - 1).fill('white'),
+                                borderWidth: 0.5,
+                                fill: false,
+                                pointBackgroundColor: Array(sinr_chart.data.labels.length).fill('black'),
+                                pointBorderColor: Array(sinr_chart.data.labels.length).fill('black'),
+                                pointHoverRadius: 9,
+                            };
+                            sinr_chart.data.datasets.push(dataset);
+                        }
+
+                        const currentValue = sinr[ueId] !== null && sinr[ueId] !== undefined ? sinr[ueId] : 0;
+                        dataset.data.push(currentValue);
+                        dataset.data.shift();
+                        dataset.pointBackgroundColor.push(cellColor);
+                        dataset.pointBackgroundColor.shift();
+                        dataset.pointBorderColor.push(cellColor);
+                        dataset.pointBorderColor.shift();
+                        dataset.backgroundColor = cellColor;
 
 
-                const legendContainer = document.getElementById('chart-legend');
-                legendContainer.innerHTML = '';
+                    });
 
-                cellData.forEach(cell => {
-                    const legendItem = document.createElement('div');
-                    legendItem.className = 'legend-item';
+                    sinr_chart.update();
 
-                    const colorBox = document.createElement('div');
-                    colorBox.className = 'legend-color-box';
-                    colorBox.style.backgroundColor = cell.backgroundColor;
+                    const retx = data.retx;
+                    Object.keys(retx).forEach(ueId => {
+                        const intUeId = parseInt(ueId, 10);
+                        let dataset = retx_chart.data.datasets.find(d => d.label === `Ue ${ueId}`);
+                        const ue = data.ues.find(ue => parseInt(ue.ue_id, 10) === intUeId);
+                        const serv_cell_id = parseInt(ue.L3servingSINR_CellID, 10);
+                        const cellColor = cellColorMap.get(serv_cell_id) || 'black';
+                        if (!dataset) {
+                            dataset = {
+                                label: `Ue ${ueId}`,
+                                ueid: intUeId,
+                                data: Array(retx_chart.data.labels.length).fill(0),
+                                backgroundColor: 'black',
+                                borderColor: Array(retx_chart.data.labels.length - 1).fill('white'),
+                                borderWidth: 0.5,
+                                fill: false,
+                                pointBackgroundColor: Array(retx_chart.data.labels.length).fill('black'),
+                                pointBorderColor: Array(retx_chart.data.labels.length).fill('black'),
+                                pointHoverRadius: 9,
+                            };
+                            retx_chart.data.datasets.push(dataset);
+                        }
 
-                    const legendText = document.createElement('span');
-                    legendText.className = 'legend-text';
-                    legendText.textContent = `
+                        const currentValue = retx[ueId] !== null && retx[ueId] !== undefined ? retx[ueId] : 0;
+                        dataset.data.push(currentValue);
+                        dataset.data.shift();
+                        dataset.pointBackgroundColor.push(cellColor);
+                        dataset.pointBackgroundColor.shift();
+                        dataset.pointBorderColor.push(cellColor);
+                        dataset.pointBorderColor.shift();
+                        dataset.backgroundColor = cellColor;
+                    });
+                    retx_chart.update();
+
+                    const prb_usage = data.prb;
+                    Object.keys(prb_usage).forEach(cellId => {
+                        let dataset = prb_usage_chart.data.datasets.find(d => d.label === `Cell ${cellId}`);
+                        const intCellId = parseInt(cellId, 10);
+                        if (!dataset) {
+                            dataset = {
+                                label: `Cell ${cellId}`,
+                                cell_id: intCellId,
+                                data: Array(prb_usage_chart.data.labels.length).fill(0),
+                                backgroundColor: cellColorMap.get(intCellId),
+                                borderColor: cellColorMap.get(intCellId),
+                                borderWidth: 2,
+                                fill: false
+                            };
+                            prb_usage_chart.data.datasets.push(dataset);
+                        }
+                        const currentValue = prb_usage[cellId] !== null && prb_usage[cellId] !== undefined ? prb_usage[cellId] : 0;
+                        dataset.data.push(currentValue);
+                        if (dataset.data.length > prb_usage_chart.data.labels.length) {
+                            dataset.data.shift();
+                        }
+                    });
+                    prb_usage_chart.update();
+
+                    if (actualEsChart) {
+                        const startingPower = data.starting_power || 0;
+                        const currentPower = data.current_power || 0;
+
+                        if (actualEsChart.data.datasets.length === 0) {
+                            actualEsChart.data.datasets.push({
+                                label: 'Difference in power consumption between modes',
+                                data: [startingPower, currentPower],
+                                backgroundColor: ['darkgray', 'green'],
+                            });
+                            actualEsChart.data.labels = [
+                                'Network power usage\nwith ES disabled',
+                                'Current network\npower usage'
+                            ];
+                        } else {
+                            actualEsChart.data.datasets[0].data = [startingPower, currentPower];
+                            actualEsChart.data.labels = [
+                                'Network power usage\nwith ES disabled',
+                                'Current network\npower usage'
+                            ];
+                        }
+
+                        actualEsChart.update();
+                        11
+                    } else {
+                        console.error("Chart instance is not initialized.");
+                    }
+
+
+                    document.getElementById('ueSourceData').innerHTML = formatAndDisplayCellData(data.ues);
+                    document.getElementById('cellSourceData').innerHTML = formatAndDisplayCellData(data.cells);
+
+                    const legendContainer = document.getElementById('chart-legend');
+                    legendContainer.innerHTML = '';
+
+                    cellData.forEach(cell => {
+                        const legendItem = document.createElement('div');
+                        legendItem.className = 'legend-item';
+
+                        const colorBox = document.createElement('div');
+                        colorBox.className = 'legend-color-box';
+                        colorBox.style.backgroundColor = cell.backgroundColor;
+
+                        const legendText = document.createElement('span');
+                        legendText.className = 'legend-text';
+                        legendText.textContent = `
                         Cell ${cell.cell_id} (${cell.type})`;
 
-                    legendItem.appendChild(colorBox);
-                    legendItem.appendChild(legendText);
-                    legendContainer.appendChild(legendItem);
-                });
+                        legendItem.appendChild(colorBox);
+                        legendItem.appendChild(legendText);
+                        legendContainer.appendChild(legendItem);
+                    });
 
-                const isChartViewActive = document.getElementById('chart-content').classList.contains('active');
-                if (isChartViewActive) {
-                    legendContainer.classList.add('horizontal');
-                    legendContainer.classList.remove('vertical');
-                } else {
-                    legendContainer.classList.add('vertical');
-                    legendContainer.classList.remove('horizontal');
-                }
-            });
+                    const isChartViewActive = document.getElementById('chart-content').classList.contains('active');
+                    if (isChartViewActive) {
+                        legendContainer.classList.add('horizontal');
+                        legendContainer.classList.remove('vertical');
+                    } else {
+                        legendContainer.classList.add('vertical');
+                        legendContainer.classList.remove('horizontal');
+                    }
+                });
     }
 
 
     document.getElementById('form-toggle-button').addEventListener('click', () => {
         const formContainer = document.getElementById('form-container');
         const button = document.getElementById('form-toggle-button');
-
         if (formContainer.style.display === 'none' || formContainer.style.display === '') {
             formContainer.style.display = 'block';
             button.textContent = 'Hide simulation setup';
@@ -610,20 +1453,235 @@
         }
     });
 
+    document.getElementById('toggleButton').addEventListener('click', () => {
+        const frameContainer = document.getElementById('frameContainer');
+        const button = document.getElementById('toggleButton');
+        if (frameContainer.style.display === 'none' || frameContainer.style.display === '') {
+            frameContainer.style.display = 'block';
+            button.textContent = 'Hide A1 policy manager';
+        } else {
+            frameContainer.style.display = 'none';
+            button.textContent = 'Show A1 policy manager';
+        }
+    });
+
+    const toggleButton = document.getElementById('toggleButton');
+    toggleButton.addEventListener('click', () => {
+        frameContainer.classList.toggle('hidden');
+    });
+
+    const frameContainer = document.getElementById('frameContainer');
+
+    const fetchData = (endpoint, responseId) => {
+        fetch(endpoint)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const responseElement = document.getElementById(responseId);
+
+                    const preElement = document.createElement('pre');
+                    preElement.style.color = "white";
+                    preElement.textContent = JSON.stringify(data, null, 2);
+
+                    responseElement.innerHTML = '';
+                    responseElement.appendChild(preElement);
+                })
+                .catch(error => {
+                    const responseElement = document.getElementById(responseId);
+                    responseElement.innerText = `Error: ${error.message}`;
+                });
+    };
+
+
+
+    document.getElementById('fetchData1').addEventListener('click', () => {
+        const url = `http://${host_ns3}:9000/a1-p/policytypes`;
+        fetchData(url, 'response1');
+
+    });
+
+    document.getElementById('fetchData2').addEventListener('click', () => {
+        const param1 = document.getElementById('param1').value;
+        if (param1 == '' || isNaN(param1)) {
+            document.getElementById('response2').innerText = "'policy_type_id:' must be fulfilled.";
+        } else {
+            const url = `http://${host_ns3}:9000/a1-p/policytypes/${param1}`;
+            fetchData(url, 'response2');
+        }
+    });
+
+    document.getElementById('fetchData3').addEventListener('click', () => {
+        const param1 = document.getElementById('param1').value;
+        if (param1 === '' || isNaN(param1)) {
+            document.getElementById('response3').innerText = "'policy_type_id:' must be fulfilled.";
+        } else {
+            const url = `http://${host_ns3}:9000/a1-p/policytypes/${param1}/policies`;
+            fetchData(url, 'response3');
+        }
+    });
+
+    document.getElementById('fetchData4').addEventListener('click', () => {
+        const param1 = document.getElementById('param1').value;
+        const param2 = document.getElementById('param2').value;
+        if (param1 === '' || isNaN(param1)) {
+            document.getElementById('response4').innerText = "'policy_type_id:' and 'policy_instance_id:' must be fulfilled";
+        } else if (param2 === '' || !(typeof param2 === 'string' || param2 instanceof String)) {
+            document.getElementById('response4').innerText = "'policy_type_id:' and 'policy_instance_id:' must be fulfilled";
+        } else {
+            const url = `http://${host_ns3}:9000/a1-p/policytypes/${param1}/policies/${param2}/status`;
+            fetchData(url, 'response4');
+        }
+    });
+
+    const sendPutRequest = (params, jsonId, responseId, endpoint) => {
+        const jsonPayload = document.getElementById(jsonId).value;
+        const param1 = document.getElementById('param1').value;
+
+        if (param1 === '' || isNaN(param1)) {
+            document.getElementById(responseId).innerText = "'policy_type_id:' must be fulfilled.";
+            return;
+        }
+
+        if (jsonPayload === '') {
+            document.getElementById(responseId).innerText = "A valid JSON should be provided";
+            return;
+        }
+
+        const queryString = params
+            .map(({id, name}) => `${encodeURIComponent(document.getElementById(id).value)}`)
+            .join('&');
+
+        try {
+            const payload = JSON.parse(jsonPayload);
+
+            fetch(`${endpoint}${queryString}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(
+                                `HTTP error! Status: ${response.status}, Message: ${errorData.detail || errorData.message || 'Unknown error'}`
+                            );
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById(responseId).innerText = "Added successfully!";
+                })
+                .catch(error => {
+                    document.getElementById(responseId).innerText = `Error: ${error.message}`;
+                });
+        } catch (err) {
+            document.getElementById(responseId).innerText = `Invalid JSON: ${err.message}`;
+        }
+    };
+
+    document.getElementById('sendPut1').addEventListener('click', () => {
+        const url = `http://${host_ns3}:9000/a1-p/policytypes/`;
+        sendPutRequest(
+            [{id: 'param1', name: 'parameter'}],
+            'putJson1',
+            'putResponse1',
+            url
+        );
+    });
+
+    const sendPutRequest2 = (param1, param2, jsonPayload, responseId) => {
+        const url = `http://${host_ns3}:9000/a1-p/policytypes/${param1}/policies/${param2}`;
+        try {
+            const bodyPayload = JSON.stringify(jsonPayload);
+            fetch(url, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: bodyPayload
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(
+                                `HTTP error! Status: ${response.status}, Message: ${errorData.detail || errorData.message || 'Unknown error'}`
+                            );
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById(responseId).innerText = "Added successfully!";
+                })
+                .catch(error => {
+                    document.getElementById(responseId).innerText = `Error: ${error.message}`;
+                });
+        } catch (err) {
+            document.getElementById(responseId).innerText = `Invalid JSON payload: ${err.message}`;
+        }
+    };
+
+
+    document.getElementById('sendPut2').addEventListener('click', () => {
+        const param1 = document.getElementById('param1').value;
+        const param2 = document.getElementById('param2').value;
+        const jsonText = document.getElementById('putJson2').value;
+        if (param1 === '' || isNaN(param1)) {
+            document.getElementById('putResponse2').innerText = "'policy_type_id:' and 'policy_instance_id:' must be fulfilled.";
+            return;
+        } else if (param2 === '' || !(typeof param2 === 'string' || param2 instanceof String)) {
+            document.getElementById('putResponse2').innerText = "'policy_type_id:' and 'policy_instance_id:' must be fulfilled.";
+            return;
+        } else if (jsonText === '') {
+            document.getElementById('putResponse2').innerText = "A valid JSON should be provided";
+            return;
+        }
+        let jsonPayload;
+        try {
+            jsonPayload = JSON.parse(jsonText || '{}');
+        } catch (error) {
+            document.getElementById('putResponse2').innerText =
+                `Error: ${error.message}`;
+            return;
+        }
+        sendPutRequest2(param1, param2, jsonPayload, 'putResponse2');
+    });
 
     document.getElementById('chart-tab').addEventListener('click', () => {
         document.getElementById('chart-content').classList.add('active');
         document.getElementById('data-content').classList.remove('active');
+        document.getElementById('chart-content').style.display = 'flex'
+        document.getElementById('es-content').classList.remove('active');
         document.getElementById('chart-tab').classList.add('active');
         document.getElementById('data-tab').classList.remove('active');
+        document.getElementById('es-tab').classList.remove('active');
         updateChart();
     });
 
     document.getElementById('data-tab').addEventListener('click', () => {
         document.getElementById('chart-content').classList.remove('active');
         document.getElementById('data-content').classList.add('active');
+        document.getElementById('chart-content').style.display = 'flex'
+        document.getElementById('es-content').classList.remove('active');
         document.getElementById('chart-tab').classList.remove('active');
         document.getElementById('data-tab').classList.add('active');
+        document.getElementById('es-tab').classList.remove('active');
+        updateChart();
+    });
+
+    document.getElementById('es-tab').addEventListener('click', () => {
+        document.getElementById('chart-content').classList.remove('active');
+        document.getElementById('data-content').classList.remove('active');
+        document.getElementById('chart-content').style.display = 'none'
+        document.getElementById('es-content').classList.add('active');
+        document.getElementById('chart-tab').classList.remove('active');
+        document.getElementById('data-tab').classList.remove('active');
+        document.getElementById('es-tab').classList.add('active');
         updateChart();
     });
 
@@ -631,10 +1689,11 @@
         event.preventDefault();
     });
 
-    setInterval(updateChart, 1250);
+    setInterval(updateChart, 2000);
     updateChart();
 
     function sendForm(endpoint) {
+        resetSim()
         const form = document.getElementById('simulationForm');
         const formData = new FormData(form);
         const data = {};
@@ -649,10 +1708,10 @@
         const statusLabel = document.getElementById('status_label');
         const startButton = document.getElementById('start_button')
         const stopButton = document.getElementById('stop_button')
+        const warninglabel = document.getElementById('warning_label')
         statusLabel.textContent = 'Simulation starting';
         startButton.disabled = true
         stopButton.disabled = false
-
 
         fetch(endpoint, {
             method: 'POST',
@@ -661,22 +1720,24 @@
             },
             body: JSON.stringify(data)
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Success:', data);
-statusLabel.textContent = 'Simulation running (if there are no Cells/UEs on the grid after max 30s, please check if ns3 is running properly typing in terminal "ps -a" or "cat ns-3-mmwave-oran/ns3_run.log")';
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                statusLabel.textContent = 'Error while starting up the simulation';
-                startButton.disabled = false
-                stopButton.disabled = true
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    statusLabel.textContent = 'Simulation running';
+                    warninglabel.textContent = 'Warning: if there are no Cells/UEs on the grid after max 30s, please check if ns3 is running properly typing in terminal "ps -a" or "cat ns-3-mmwave-oran/ns3_run.log"';
+
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    statusLabel.textContent = 'Error while starting up the simulation';
+                    startButton.disabled = false
+                    stopButton.disabled = true
+                });
     }
 
     function stopSim(endpoint) {
@@ -694,21 +1755,21 @@ statusLabel.textContent = 'Simulation running (if there are no Cells/UEs on the 
                 'Content-Type': 'application/json'
             }
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Success:', data);
-                statusLabel.textContent = 'Simulation stopped';
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                statusLabel.textContent = 'Error encountered while stopping the simulation';
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    statusLabel.textContent = 'Simulation stopped';
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    statusLabel.textContent = 'Error encountered while stopping the simulation';
 
-            });
+                });
     }
 
     function resetSim(endpoint) {
@@ -716,29 +1777,122 @@ statusLabel.textContent = 'Simulation running (if there are no Cells/UEs on the 
         statusLabel.textContent = 'Resetting simulation';
         const resetButton = document.getElementById('reset_button')
         resetButton.disabled = true
+        const sim_id_label = document.getElementById('simid_label')
+        sim_id_label.textContent = "off"
+        const esStatusLabel = document.getElementById('es_status_label')
+        esStatusLabel.textContent = "off"
+        const esChart = Chart.getChart('es-mode-chart');
+        esChart.data.datasets = [];
+        esChart.update();
+        const sinrChart = Chart.getChart('sinr-chart');
+        sinrChart.data.datasets = [];
+        sinrChart.update();
+        const retxChart = Chart.getChart('retx-chart');
+        retxChart.data.datasets = [];
+        retxChart.update();
+        const prbChart = Chart.getChart('prb-usage-chart');
+        prbChart.data.datasets = [];
+        prbChart.update();
+        const diffChart = Chart.getChart('es_diff');
+        diffChart.data.datasets = [];
+        diffChart.update();
+
         fetch(endpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             }
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Success:', data);
-                statusLabel.textContent = 'off';
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    statusLabel.textContent = 'off';
 
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                statusLabel.textContent = 'Error encountered while resetting the simulation';
-            });
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    statusLabel.textContent = 'Error encountered while resetting the simulation';
+                });
     }
 
+
+    function startEs() {
+        const esStatusLabel = document.getElementById('es_status_label');
+        esStatusLabel.textContent = 'Sending start request to the xApp';
+
+        const url = `http://${host_ns3}:38868`;
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: 'start'
+        })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.text();
+                })
+                .then(responseText => {
+                    console.log('Response text:', responseText);
+                    if (responseText.trim() === 'xApp process started.') {
+                        esStatusLabel.textContent = 'ES xApp started';
+                    } else {
+                        esStatusLabel.textContent = `Unexpected response: ${responseText}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    esStatusLabel.textContent = 'Unexpected error has occurred.';
+                });
+    }
+
+    function stopEs() {
+        const esStatusLabel = document.getElementById('es_status_label');
+        esStatusLabel.textContent = 'Sending stop request to the xApp';
+
+        const url = `http://${host_ns3}:38869`;
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: 'stop'
+        })
+                .then(response => {
+                    if (response.ok) {
+                        esStatusLabel.textContent = 'ES xApp stopped.';
+                    } else {
+                        esStatusLabel.textContent = 'Unexpected error has occurred.';
+                    }
+                })
+                .catch(error => {
+                    if (error.name === 'AbortError') {
+                        esStatusLabel.textContent = 'Connection timed out, try again later.';
+                    } else {
+                        console.error('Error:', error);
+                        esStatusLabel.textContent = 'Unexpected error has occurred.';
+                    }
+                });
+    }
+
+
+    function formatAndDisplayCellData(data) {
+        return data.map(cell => {
+            return `<div class="object-box">${Object.entries(cell)
+                    .map(([key, value]) => `${key}: <span class="value">${value === null || value === "" ? "N/A" : value}</span>`
+        )
+        .
+            join("<br>")
+        }
+    </div>
+        `;
+                    }).join("");
+                }
 </script>
 </body>
 </html>

@@ -20,13 +20,16 @@ def get_simulation() -> Simulation:
 
 @influx_data_router.get("/")
 async def root(request: Request, simulation: Simulation = Depends(get_simulation)):
+    host_ns3 = os.getenv('NS3_HOST')
     return templates.TemplateResponse(
         "chart.html",
         {
             "request": request,
             "ues": simulation.ues,
             "cells": simulation.cells,
+            "sim_id": simulation.sim_id,
             "chart_dimensions": (simulation.max_x, simulation.max_y),
+            "host_ns3": host_ns3,
         },
     )
 
@@ -35,10 +38,29 @@ async def root(request: Request, simulation: Simulation = Depends(get_simulation
 async def refresh_data(request: Request, simulation: Simulation = Depends(get_simulation)):
     SimulationManager.refresh_simulation()
     updated_simulation = SimulationManager.get_simulation()
+    es_state = {}
+    sinr = {}
+    retx = {}
+    prb = {}
+    for cell in updated_simulation.cells:
+        es_state[cell.cell_id] = cell.es_state
+        prb[cell.cell_id] = cell.dlPrbUsage_percentage
+    for ue in updated_simulation.ues:
+        sinr[ue.ue_id] = ue.L3servingSINR_dB
+        retx[ue.ue_id] = ue.ErrTotalNbrDl
+    print(updated_simulation.ues)
     return {
         "ues": [asdict(ue) for ue in updated_simulation.ues],
         "cells": [asdict(cell) for cell in updated_simulation.cells],
         "max_x_max_y": (updated_simulation.max_x, updated_simulation.max_y),
+        "sim_id": updated_simulation.sim_id if updated_simulation.sim_id else 'off',
+        "es_state": es_state,
+        "sinr": sinr,
+        "retx": retx,
+        "prb": prb,
+        "starting_power": updated_simulation.starting_power,
+        "current_power": updated_simulation.current_power,
+        "simulation_status": updated_simulation.simulation_status,
     }
 
 
@@ -84,6 +106,7 @@ async def start_simulation(request: Request):
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print("Response from server:")
         print(result.stdout)
+        SimulationManager.start_simulation()
     except Exception as e:
         print(f"An error occurred: {e}")
     number_of_ues = int(form_data.get('N_Ues', 2))
@@ -112,6 +135,7 @@ async def stop_simulation():
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print("Response from server:")
         print(result.stdout)
+        SimulationManager.stop_simulation()
     except Exception as e:
         print(f"An error occurred: {e}")
 

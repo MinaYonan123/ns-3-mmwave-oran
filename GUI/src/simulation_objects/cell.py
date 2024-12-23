@@ -8,6 +8,9 @@ class Cell:
     x_position: float
     y_position: float
     type: str
+    es_state: int
+    es_power: int
+    serving_sinr: float
     ErrTotalNbrDl: Optional[int] = None
     MeanActiveUEsDownlink: Optional[int] = None
     DRB_BufferSize_Qos: Optional[float] = None

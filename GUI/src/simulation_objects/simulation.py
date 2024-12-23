@@ -9,7 +9,7 @@ from src.simulation_objects.ue import Ue
 
 class Simulation:
 
-    def __init__(self, number_of_ues: int, number_of_cells: int):
+    def __init__(self, number_of_ues: int, number_of_cells: int, sim_id: int = None):
         self.db_client = InfluxDBClient(
             host=os.getenv("INFLUXDB_HOST"),
             port=int(os.getenv("INFLUXDB_PORT")),
@@ -20,14 +20,29 @@ class Simulation:
         self.simulation_start_time = time.time_ns()
         self.number_of_ues = number_of_ues
         self.number_of_cells = number_of_cells
+        self.ue_history = []
+        self.cell_history = []
+        self.starting_power = 0
+        self.current_power = 0
+        self.simulation_status = 'on'
         if number_of_ues > 0 and number_of_cells > 0:
             self.max_x, self.max_y = self.get_charts_max_axis_value()
-            self.ues, self.cells = self.get_simulation_data(self.number_of_ues, self.number_of_cells)
+            self.ues, self.cells, sim_id_from_ue = self.get_simulation_data(self.number_of_ues, self.number_of_cells)
+            self.ue_history.append(self.ues)
+            self.cell_history.append(self.cells)
+            if sim_id is not None:
+                self.sim_id = sim_id
+            else:
+                self.sim_id = sim_id_from_ue
+            
         else:
             self.max_x = 6000
             self.max_y = 6000
             self.ues = []
             self.cells = []
+            self.sim_id = None
+
+
 
     def get_charts_max_axis_value(self):
         max_x = self.get_last_value_from_measurement('gnbs_x_0')
@@ -38,7 +53,7 @@ class Simulation:
             max_y = 6000
         return (int(max_x), int(max_y))
 
-    def get_simulation_data(self, number_of_ues: int, number_of_cells: int) -> (list[Ue], list[Cell]):
+    def get_simulation_data(self, number_of_ues: int, number_of_cells: int) -> (list[Ue], list[Cell], int):
         ues = []
         cells = []
         for ue_id in range(1, number_of_ues + 1):
@@ -83,11 +98,15 @@ class Simulation:
             ues.append(ue)
         for cell_id in range(1, number_of_cells + 1):
             cell_x, cell_y, cell_type = self.get_cell_position_and_type(cell_id)
+            es_state, es_power = self.get_cell_es_state_and_power(cell_id)
             cell = Cell(
                 cell_id=cell_id,
                 x_position=cell_x,
                 y_position=cell_y,
                 type=cell_type,
+                es_state=es_state,
+                es_power=es_power,
+                serving_sinr=self.get_last_value_from_measurement(f'cu-cp-cell-{cell_id}_l3 serving sinr'),
                 ErrTotalNbrDl=self.get_last_value_from_measurement(f'du-cell-{cell_id}_tb.errtotalnbrdl.1.ueid'),
                 MeanActiveUEsDownlink=self.get_last_value_from_measurement(f'du-cell-{cell_id}_drb.meanactiveuedl'),
                 DRB_BufferSize_Qos=self.get_last_value_from_measurement(f'du-cell-{cell_id}_drb.buffersize.qos.ueid'),
@@ -109,7 +128,8 @@ class Simulation:
                     f'cu-up-cell-{cell_id}_m_pdcpbytesdl (celldltxvolume)'),
             )
             cells.append(cell)
-        return ues, cells
+            sim_id = self.get_last_value_from_measurement('ue_position_simid_1')
+        return ues, cells, sim_id
 
     def get_last_value_from_measurement(self, measurement_name: str) -> float | str | int | None:
         try:
@@ -117,6 +137,20 @@ class Simulation:
             if result:
                 points = list(result.get_points(measurement=measurement_name))
                 value = points[0].get('last')
+                if isinstance(value, float) and value.is_integer():
+                    return int(value)
+                return value
+            else:
+                return None
+        except Exception as e:
+            raise Exception(f"Error querying InfluxDB: {e}")
+
+    def get_first_value_from_measurement(self, measurement_name: str) -> float | str | int | None:
+        try:
+            result = self.db_client.query(f'SELECT FIRST("value") FROM "{measurement_name}" where time > {self.simulation_start_time}')
+            if result:
+                points = list(result.get_points(measurement=measurement_name))
+                value = points[0].get('first')
                 if isinstance(value, float) and value.is_integer():
                     return int(value)
                 return value
@@ -162,3 +196,12 @@ class Simulation:
             cell_type = 'mmwave'
 
         return x_val, y_val, cell_type
+
+    def get_cell_es_state_and_power(self, cell_id: int) -> (int, int):
+        if cell_id == 1:
+            es_state = self.get_last_value_from_measurement(f'enbs_esstate_{cell_id}')
+            es_power = self.get_last_value_from_measurement(f'enbs_espower_{cell_id}')
+        else:
+            es_state = self.get_last_value_from_measurement(f'gnbs_esstate_{cell_id}')
+            es_power = self.get_last_value_from_measurement(f'gnbs_espower_{cell_id}')
+        return es_state, es_power
