@@ -31,6 +31,7 @@
 #include "ns3/mmwave-helper.h"
 #include "ns3/epc-helper.h"
 #include "ns3/mmwave-point-to-point-epc-helper.h"
+#include "../src/mmwave/model/node-container-manager.h"
 #include "ns3/lte-helper.h"
 #include <sys/time.h>
 #include <ctime>
@@ -55,6 +56,7 @@ std::map<uint64_t, uint32_t> ueimsi_nodeid;
 int ue_assoc_list[10] = {0};
 double maxXAxis;
 double maxYAxis;
+bool esON_list[10] = {0};
 
 /**
  * Scenario Zero
@@ -102,10 +104,9 @@ PrintGnuplottableUeListToFile(std::string filename) {
 }
 
 void
-PrintGnuplottableEnbListToFile() {
-    struct timeval time_now{};
-    gettimeofday(&time_now, nullptr);
-    uint64_t m_startTime = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
+PrintGnuplottableEnbListToFile(uint64_t m_startTime) {
+
+    //uint64_t m_startTime = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
     uint64_t timestamp = m_startTime + (uint64_t) Simulator::Now().GetMilliSeconds();
     //
     std::string filename1 = "enbs.txt";
@@ -127,7 +128,8 @@ PrintGnuplottableEnbListToFile() {
                     return;
                 }
                 //outFile1 << timestamp << "," << enbdev->GetCellId() << "," << pos.x << "," << pos.y << pos.z << std::endl;
-                outFile1 << timestamp << "," << enbdev->GetCellId() << "," << pos.x << "," << pos.y << std::endl;
+                outFile1 << timestamp << "," << enbdev->GetCellId() << "," << pos.x << "," << pos.y << ","
+                         << m_startTime << "," << "0" << "," << "30" << std::endl;
                 outFile1.close();
             } else if (mmdev) {
                 Vector pos = node->GetObject<MobilityModel>()->GetPosition();
@@ -138,14 +140,22 @@ PrintGnuplottableEnbListToFile() {
                     return;
                 }
                 auto ueMap = mmdev->GetUeMap();
+                Ptr<MmWaveEnbPhy> enbPhy = node->GetDevice(j)->GetObject<MmWaveEnbNetDevice>()->GetPhy();
                 for (const auto &ue: ueMap) {
                     uint64_t imsi_assoc = ue.second->GetImsi();
                     //NS_LOG_UNCOND ("IMSI: " << imsi_assoc << " associated with cell: "  << mmdev->GetCellId ());
                     ue_assoc_list[imsi_assoc - 1] = mmdev->GetCellId();
                 }
-
+                uint16_t cell_id = mmdev->GetCellId();
+                double es_power = enbPhy->GetTxPower();
+                if (es_power == 0) {
+                    esON_list[cell_id] = true;
+                } else {
+                    esON_list[cell_id] = false;
+                }
                 //outFile2 << timestamp << "," << enbdev->GetCellId() << "," << pos.x << "," << pos.y << pos.z << std::endl;
-                outFile2 << timestamp << "," << mmdev->GetCellId() << "," << pos.x << "," << pos.y << std::endl;
+                outFile2 << timestamp << "," << cell_id << "," << pos.x << "," << pos.y << ","
+                         << m_startTime << "," << esON_list[cell_id] << "," << es_power << std::endl;
                 outFile2.close();
             }
         }
@@ -153,7 +163,7 @@ PrintGnuplottableEnbListToFile() {
 }
 
 void
-ClearFile(std::string Filename) {
+ClearFile(std::string Filename, uint64_t m_startTime) {
     std::string filename = Filename;
     std::ofstream outFile;
     outFile.open(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
@@ -162,30 +172,26 @@ ClearFile(std::string Filename) {
         return;
     }
     outFile.close();
-    struct timeval time_now{};
-    gettimeofday(&time_now, nullptr);
-    uint64_t m_startTime = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
+    //  struct timeval time_now{};
+    //  gettimeofday (&time_now, nullptr);
+    //uint64_t m_startTime = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
     uint64_t timestamp = m_startTime + (uint64_t) Simulator::Now().GetMilliSeconds();
     std::ofstream outFile1;
     outFile1.open(filename.c_str(), std::ios_base::out | std::ios_base::app);
 
     if (Filename == "ue_position.txt") {
-        outFile1 << "timestamp,id,x,y,type,cell" << std::endl;
+        outFile1 << "timestamp,id,x,y,type,cell,simid" << std::endl;
     } else {
-        outFile1 << "timestamp,id,x,y" << std::endl;
+        outFile1 << "timestamp,id,x,y,simid,ESstate,ESpower" << std::endl;
         outFile1 << timestamp << "," << "0" << "," << maxXAxis << "," << maxYAxis << std::endl;
     }
     outFile1.close();
 }
 
 void
-PrintPosition(Ptr <Node> node, int iterator, std::string Filename) {
-    PrintGnuplottableEnbListToFile();
-    struct timeval time_now
-            {
-            };
-    gettimeofday(&time_now, nullptr);
-    uint64_t m_startTime = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
+PrintPosition(Ptr<Node> node, int iterator, std::string Filename, uint64_t m_startTime) {
+
+    //uint64_t m_startTime = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
     uint64_t timestamp = m_startTime + (uint64_t) Simulator::Now().GetMilliSeconds();
 
     int imsi;
@@ -214,8 +220,10 @@ PrintPosition(Ptr <Node> node, int iterator, std::string Filename) {
                 NS_LOG_ERROR("Can't open file " << filename);
                 return;
             }
-            outFile << timestamp << "," << imsi << "," << position.x << "," << position.y << ",mc," <<
-                    ue_assoc_list[imsi - 1] << std::endl;
+            int serving_cell = ue_assoc_list[imsi - 1];
+
+            outFile << timestamp << "," << imsi << "," << position.x << "," << position.y << ",mc,"
+                    << serving_cell << "," << m_startTime << std::endl;
             outFile.close();
         } else {
             //
@@ -630,6 +638,8 @@ main(int argc, char *argv[]) {
     allEnbNodes.Add(lteEnbNodes);
     allEnbNodes.Add(mmWaveEnbNodes);
 
+    NodeContainerManager::GetInstance().SetMmWaveEnbNodes(mmWaveEnbNodes);
+
     // Position
     Vector centerPosition = Vector(maxXAxis / 2, maxYAxis / 2, 3);
 
@@ -728,10 +738,13 @@ main(int argc, char *argv[]) {
     clientApp.Start(MilliSeconds(100));
     clientApp.Stop(Seconds(simTime - 0.1));
 
+    struct timeval time_now{};
+    gettimeofday(&time_now, nullptr);
+    uint64_t t_startTime_simid = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
     std::string ue_poss_out = "ue_position.txt";
-    ClearFile(ue_poss_out);
-    ClearFile("enbs.txt");
-    ClearFile("gnbs.txt");
+    ClearFile(ue_poss_out, t_startTime_simid);
+    ClearFile("enbs.txt", t_startTime_simid);
+    ClearFile("gnbs.txt", t_startTime_simid);
     // Since nodes are randomly allocated during each run we always need to print their positions
     PrintGnuplottableUeListToFile("ues.txt");
 
@@ -739,21 +752,14 @@ main(int argc, char *argv[]) {
     // NS_LOG_UNCOND ("number of nodes: " << nodecount);
     int UE_iterator = nodecount - int(nUeNodes);
     int numPrints = simTime / 0.1;
+
     for (int i = 0; i < numPrints; i++) {
+        Simulator::Schedule(Seconds(i * simTime / numPrints), &PrintGnuplottableEnbListToFile, t_startTime_simid);
         for (uint32_t j = 0; j < ueNodes.GetN(); j++) {
             Simulator::Schedule(Seconds(i * simTime / numPrints), &PrintPosition, ueNodes.Get(j),
-                                j + UE_iterator, ue_poss_out);
+                                j + UE_iterator, ue_poss_out, t_startTime_simid);
         }
     }
-
-    // int numPrints = 5;
-    // for (int i = 0; i < numPrints; i++)
-    //   {
-    //     for (uint32_t j = 0; j < ueNodes.GetN (); j++)
-    //       {
-    //         Simulator::Schedule (Seconds (i * simTime / numPrints), &PrintPosition, ueNodes.Get (j));
-    //       }
-    //   }
 
     if (enableTraces) {
         mmwaveHelper->EnableTraces();
@@ -766,7 +772,7 @@ main(int argc, char *argv[]) {
     lteHelper->EnableMacTraces();
 
     // Since nodes are randomly allocated during each run we always need to print their positions
-    PrintGnuplottableUeListToFile("ues.txt");
+    //PrintGnuplottableUeListToFile ("ues.txt");
     // PrintGnuplottableEnbListToFile ("enbs.txt");
 
     bool run = true;
