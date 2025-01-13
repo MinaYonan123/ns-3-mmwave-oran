@@ -1612,7 +1612,7 @@ UeManager::RecvRrcConnectionReconfigurationCompleted (LteRrcSap::RrcConnectionRe
                 pdcp->SwitchConnection(useMmWaveConnection);
                 m_rrc->m_lastMmWaveCell[m_imsi] = m_mmWaveCellId;
                 m_rrc->m_mmWaveCellSetupCompleted[m_imsi] = true;
-                NS_LOG_INFO("Imsi " << m_imsi << " m_mmWaveCellSetupCompleted set to " << m_rrc->m_mmWaveCellSetupCompleted[m_imsi] <<
+                NS_LOG_DEBUG("Imsi " << m_imsi << " m_mmWaveCellSetupCompleted set to " << m_rrc->m_mmWaveCellSetupCompleted[m_imsi] <<
                   " for cell " <<  m_rrc->m_lastMmWaveCell[m_imsi]);
                 m_rrc->m_imsiUsingLte[m_imsi] = false;
                 ForwardRlcBuffers(it->second->m_rlc, pdcp, it->second->m_gtpTeid, 1, 0, it->first);
@@ -4109,7 +4109,7 @@ LteEnbRrc::PerformHandoverToTargetCell (uint64_t imsi, uint16_t targetCellId)
       EpcX2SapProvider::SecondaryHandoverParams params;
       params.imsi = imsi;
       params.targetCellId = targetCellId;
-      params.oldCellId = 2 ; // m_lastMmWaveCell[imsi]; 
+      params.oldCellId = 2 ; //m_lastMmWaveCell[imsi]; 
        // The new secondary cell HO procedure does not require to switch to LTE
       // NS_LOG_UNCOND("PerformHandover ----- handover from " << m_lastMmWaveCell[imsi] << 
       //             " to " << targetCellId << " at time " << Simulator::Now().GetSeconds());

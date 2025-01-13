@@ -63,6 +63,7 @@
 #include <fstream>
 #include <sstream>
 #include <ns3/lte-indication-message-helper.h>
+#include "UEID-GNB.h"
 
 
 namespace ns3 {
@@ -171,30 +172,46 @@ namespace ns3 {
         Ptr <RicControlMessage> controlMessage = Create<RicControlMessage>(sub_req_pdu);
         NS_LOG_INFO("After RicControlMessage::RicControlMessage constructor");
         NS_LOG_INFO("Request type " << controlMessage->m_requestType);
-        switch (controlMessage->m_requestType) {
-            case RicControlMessage::ControlMessageRequestIdType::HO : {
-                NS_LOG_INFO("HO, do the handover");
-                // do handover
-                Ptr <OctetString> imsiString =
-                        Create<OctetString>((void *) controlMessage->m_e2SmRcControlHeaderFormat1->ueID.choice.gNB_UEID,
-                                            controlMessage->m_e2SmRcControlHeaderFormat1->ueID.present);  //this line need to fix 
-                char *end;
+         switch (controlMessage->m_e2SmRcControlHeaderFormat1->ric_Style_Type) {
+           case RicControlMessage::ControlMessageServiceStyle::Connected_Mode_Mobility : {
+            NS_LOG_INFO("Connected mobility, do the handover");
+            // do handover
+          switch (controlMessage->m_e2SmRcControlHeaderFormat1->ric_ControlAction_ID) {
+            case RicControlMessage::Connected_Mode_Mobility_Control_Action_ID::Handover_Control :{
 
-                uint64_t imsi = std::strtoull(imsiString->DecodeContent().c_str(), &end, 10);
-                uint16_t targetCellId = std::stoi(controlMessage->GetSecondaryCellIdHO());
+                UEID_GNB_t *UEgnb = (UEID_GNB_t *) calloc (1, sizeof (UEID_GNB_t));
+
+                UEgnb = controlMessage->m_e2SmRcControlHeaderFormat1->ueID.choice.gNB_UEID;
+                uint64_t imsi = {0};
+                memcpy(&imsi, UEgnb->ran_UEID->buf, UEgnb->ran_UEID->size);
+                //uint16_t targetCellId = std::stoi(controlMessage->GetSecondaryCellIdHO());
+                uint16_t targetCellId = controlMessage->GetTargetCell();
                 NS_LOG_INFO("Imsi Decoded: " << imsi);
-                NS_LOG_INFO("Target Cell id " << targetCellId);
+                NS_LOG_UNCOND("Target Cell id " << targetCellId);
                 m_rrc->TakeUeHoControl(imsi);
                 if (!m_forceE2FileLogging) {
                     Simulator::ScheduleWithContext(1, Seconds(0), &LteEnbRrc::PerformHandoverToTargetCell,
-                                                   m_rrc, imsi, targetCellId);
+                                                    m_rrc, imsi, targetCellId);
                 } else {
                     Simulator::Schedule(Seconds(0), &LteEnbRrc::PerformHandoverToTargetCell,
                                         m_rrc, imsi, targetCellId);
                 }
-                break;
+              break;
             }
-            case RicControlMessage::ControlMessageRequestIdType::Es: {
+           
+             case RicControlMessage::Connected_Mode_Mobility_Control_Action_ID::Conditional_Handover_Control :{
+                NS_LOG_UNCOND("Unsupported Control Action ");
+                break; 
+             }
+            
+             default: {
+             NS_LOG_INFO("Unrecognized Control Action type of Ric Control Message");
+             break;
+             }
+        }
+        break;
+    }
+            case RicControlMessage::ControlMessageServiceStyle::Energy_state: {
                 // use SetUeQoS()
                 NS_FATAL_ERROR("For QoS use file-based control.");
                 break;
