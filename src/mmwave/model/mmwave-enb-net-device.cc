@@ -652,31 +652,6 @@ void
     NS_LOG_INFO("Request type " << controlMessage->m_e2SmRcControlHeaderFormat1->ric_Style_Type);
      
     switch (controlMessage->m_e2SmRcControlHeaderFormat1->ric_Style_Type) {
-<<<<<<< Updated upstream
-        case RicControlMessage::ControlMessageRequestIdType::HO : {
-            NS_LOG_INFO("Connected mobility, do the handover");
-            // do handover
-            UEID_GNB_t *UEgnb = (UEID_GNB_t *) calloc (1, sizeof (UEID_GNB_t));
-                                                                
-            UEgnb = controlMessage->m_e2SmRcControlHeaderFormat1->ueID.choice.gNB_UEID;
-            uint64_t imsi = {0};
-            memcpy(&imsi, UEgnb->ran_UEID->buf, UEgnb->ran_UEID->size);
-            //uint16_t targetCellId = std::stoi(controlMessage->GetSecondaryCellIdHO());
-            uint16_t targetCellId = controlMessage->GetTargetCell();
-            NS_LOG_INFO("Imsi Decoded: " << imsi);        
-            NS_LOG_UNCOND("Target Cell id " << targetCellId);
-            m_rrc->TakeUeHoControl(imsi);
-            if (!m_forceE2FileLogging) {             
-                Simulator::ScheduleWithContext(1, Seconds(0), &LteEnbRrc::PerformHandoverToTargetCell,
-                                                m_rrc, imsi, targetCellId);
-            } else {
-                Simulator::Schedule(Seconds(0), &LteEnbRrc::PerformHandoverToTargetCell,
-                                    m_rrc, imsi, targetCellId);
-            }
-            break;
-        }
-         case RicControlMessage::ControlMessageRequestIdType::Es : {       
-=======
        case RicControlMessage::ControlMessageServiceStyle::Radio_Bearer_Control : {
           NS_LOG_UNCOND("Unsupported RIC Style Type ");
         break;
@@ -728,7 +703,6 @@ void
         break;
     }
          case RicControlMessage::ControlMessageServiceStyle::Energy_state : {
->>>>>>> Stashed changes
                  for (uint32_t i = 0; i < mmWaveEnbNodes.GetN (); i++)
                       {
                         Ptr<MmWaveEnbPhy> enbPhy =
@@ -837,11 +811,7 @@ Ptr<KpmIndicationMessage>
             }
             if (m_e2andlog)
             {
-<<<<<<< Updated upstream
                 local_m_forceE2FileLogging = true;
-=======
-                local_m_forceE2FileLogging = false;
->>>>>>> Stashed changes
             }
 
             Ptr<MmWaveIndicationMessageHelper> indicationMessageHelper =
@@ -1236,11 +1206,7 @@ MmWaveEnbNetDevice::GetRlcBufferOccupancy(Ptr<LteRlc> rlc) const
             }
             if (m_e2andlog)
             {
-<<<<<<< Updated upstream
                 local_m_forceE2FileLogging = true;
-=======
-                local_m_forceE2FileLogging = false;
->>>>>>> Stashed changes
             }
 
             Ptr<MmWaveIndicationMessageHelper> indicationMessageHelper =
@@ -1778,14 +1744,5 @@ MmWaveEnbNetDevice::SetStartTime (uint64_t st)
   m_startTime = st;
 }
 
-<<<<<<< Updated upstream
-=======
-/*bool
-MmWaveEnbNetDevice::GetESStates () const
-{
-    return  esON_cellID;
-}*/
-
->>>>>>> Stashed changes
 }
 }
