@@ -32,66 +32,67 @@
 #include <ns3/log.h>
 namespace ns3{
 
-NS_LOG_COMPONENT_DEFINE ("MmWaveRadioEnergyModelEnbHelper");
-MmWaveRadioEnergyModelEnbHelper::MmWaveRadioEnergyModelEnbHelper ()
-{
-    m_radioEnergy.SetTypeId ("ns3::MmWaveRadioEnergyModelEnb");
-    m_depletionCallback.Nullify ();
-    m_rechargedCallback.Nullify ();
-}
-
-MmWaveRadioEnergyModelEnbHelper::~MmWaveRadioEnergyModelEnbHelper ()
-{
-    
-}
-
-void
-MmWaveRadioEnergyModelEnbHelper::SetDepletionCallback (
-    MmWaveRadioEnergyModelEnb::MmWaveRadioEnergyDepletionCallback callback )
-{
-    m_depletionCallback = callback;
-}
-void
-MmWaveRadioEnergyModelEnbHelper::SetRechargedCallback (
-    MmWaveRadioEnergyModelEnb::MmWaveRadioEnergyRechargedCallback callback )
-{
-    m_rechargedCallback = callback;
-}
-
-Ptr<DeviceEnergyModel>
-MmWaveRadioEnergyModelEnbHelper::DoInstall(Ptr<NetDevice> device,
-                                            Ptr<EnergySource> source) const
-{
-    NS_ASSERT (device != NULL);
-    NS_ASSERT (source != NULL);
-    std::string deviceName = device->GetInstanceTypeId ().GetName ();
-    if (deviceName.compare ("ns3::MmWaveEnbNetDevice") != 0)
+    NS_LOG_COMPONENT_DEFINE ("MmWaveRadioEnergyModelEnbHelper");
+    MmWaveRadioEnergyModelEnbHelper::MmWaveRadioEnergyModelEnbHelper ()
     {
-        NS_LOG_ERROR("Device is not of type EnbNetDevice");
+        m_radioEnergy.SetTypeId ("ns3::MmWaveRadioEnergyModelEnb");
+        m_depletionCallback.Nullify ();
+        m_rechargedCallback.Nullify ();
     }
 
-    Ptr<Node> node = device->GetNode ();
-    Ptr<MmWaveRadioEnergyModelEnb> model = m_radioEnergy.Create ()->GetObject<MmWaveRadioEnergyModelEnb> ();
-    NS_ASSERT (model != NULL);
-    model->SetNode (node);
-    Ptr<mmwave::MmWaveEnbNetDevice> mmwaveEnbDevice;
-    Ptr<ns3::mmwave::MmWaveEnbPhy> mmwavePhy;
-    
-    if (deviceName == "ns3::MmWaveEnbNetDevice")
+    MmWaveRadioEnergyModelEnbHelper::~MmWaveRadioEnergyModelEnbHelper ()
     {
-        mmwaveEnbDevice = DynamicCast<mmwave::MmWaveEnbNetDevice> (device);
-        mmwavePhy = mmwaveEnbDevice->GetPhy ();
-        // mcDevice->DoDispose ();
-    }
-    Ptr<ns3::mmwave::MmWaveSpectrumPhy> mmwaveDlSpectrumPhy = mmwavePhy->GetDlSpectrumPhy();
-    Ptr<ns3::mmwave::MmWaveSpectrumPhy> mmwaveUlSpectrumPhy = mmwavePhy->GetUlSpectrumPhy ();
-    mmwaveDlSpectrumPhy->TraceConnectWithoutContext ("State", MakeCallback (&MmWaveRadioEnergyModelEnb::ChangeStateEvent, model));
-    mmwaveUlSpectrumPhy->TraceConnectWithoutContext ("State", MakeCallback (&MmWaveRadioEnergyModelEnb::ChangeStateEvent, model));
-    model->SetEnergyDepletionCallback (m_depletionCallback);
-    model->SetEnergyRechargedCallback (m_rechargedCallback);
-    source->AppendDeviceEnergyModel (model);
-    model->SetEnergySource (source);
 
-    return model;
-}
+    }
+
+    void
+    MmWaveRadioEnergyModelEnbHelper::SetDepletionCallback (
+            MmWaveRadioEnergyModelEnb::MmWaveRadioEnergyDepletionCallback callback )
+    {
+        m_depletionCallback = callback;
+    }
+    void
+    MmWaveRadioEnergyModelEnbHelper::SetRechargedCallback (
+            MmWaveRadioEnergyModelEnb::MmWaveRadioEnergyRechargedCallback callback )
+    {
+        m_rechargedCallback = callback;
+    }
+
+    Ptr<DeviceEnergyModel>
+    MmWaveRadioEnergyModelEnbHelper::DoInstall(Ptr<NetDevice> device,
+                                               Ptr<EnergySource> source) const
+    {
+        NS_ASSERT (device != NULL);
+        NS_ASSERT (source != NULL);
+        std::string deviceName = device->GetInstanceTypeId ().GetName ();
+        if (deviceName.compare ("ns3::MmWaveEnbNetDevice") != 0)
+        {
+            NS_LOG_ERROR("Device is not of type EnbNetDevice");
+        }
+
+        Ptr<Node> node = device->GetNode ();
+        Ptr<MmWaveRadioEnergyModelEnb> model = m_radioEnergy.Create ()->GetObject<MmWaveRadioEnergyModelEnb> ();
+        NS_ASSERT (model != NULL);
+        model->SetNode (node);
+        Ptr<mmwave::MmWaveEnbNetDevice> mmwaveEnbDevice;
+        Ptr<ns3::mmwave::MmWaveEnbPhy> mmwavePhy;
+
+        if (deviceName == "ns3::MmWaveEnbNetDevice")
+        {
+            mmwaveEnbDevice = DynamicCast<mmwave::MmWaveEnbNetDevice> (device);
+            mmwavePhy = mmwaveEnbDevice->GetPhy ();
+            NS_LOG_UNCOND("found cell");
+            // mcDevice->DoDispose ();
+        }
+        Ptr<ns3::mmwave::MmWaveSpectrumPhy> mmwaveDlSpectrumPhy = mmwavePhy->GetDlSpectrumPhy();
+        Ptr<ns3::mmwave::MmWaveSpectrumPhy> mmwaveUlSpectrumPhy = mmwavePhy->GetUlSpectrumPhy ();
+        mmwaveDlSpectrumPhy->TraceConnectWithoutContext ("State", MakeCallback (&MmWaveRadioEnergyModelEnb::ChangeStateEvent, model));
+        mmwaveUlSpectrumPhy->TraceConnectWithoutContext ("State", MakeCallback (&MmWaveRadioEnergyModelEnb::ChangeStateEvent, model));
+        model->SetEnergyDepletionCallback (m_depletionCallback);
+        model->SetEnergyRechargedCallback (m_rechargedCallback);
+        source->AppendDeviceEnergyModel (model);
+        model->SetEnergySource (source);
+
+        return model;
+    }
 }

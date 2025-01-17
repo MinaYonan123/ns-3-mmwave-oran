@@ -43,20 +43,24 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#include "ns3/basic-energy-source-helper.h"
+#include "ns3/mmwave-radio-energy-model-enb-helper.h"
 
 using namespace ns3;
 using namespace mmwave;
 
-std::map<uint64_t, uint16_t> imsi_cellid;
-std::map<uint16_t, std::set<uint64_t>> imsi_list;
-std::map<uint16_t, Ptr < Node>>
-cellid_node;
-std::map<uint32_t, uint16_t> ue_cellid_usinghandover;
-std::map<uint64_t, uint32_t> ueimsi_nodeid;
+std::map <uint64_t, uint16_t> imsi_cellid;
+std::map <uint16_t, std::set<uint64_t>> imsi_list;
+std::map <uint16_t, Ptr<Node>>
+        cellid_node;
+std::map <uint32_t, uint16_t> ue_cellid_usinghandover;
+std::map <uint64_t, uint32_t> ueimsi_nodeid;
 int ue_assoc_list[10] = {0};
 double maxXAxis;
 double maxYAxis;
 bool esON_list[10] = {0};
+double totalnewEnergyConsumption_storage[10] = {0};
+double totaloldEnergyConsumption_storage[10] = {0};
 
 /**
  * Scenario Zero
@@ -74,12 +78,12 @@ PrintGnuplottableUeListToFile(std::string filename) {
         return;
     }
     for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); ++it) {
-        Ptr <Node> node = *it;
+        Ptr<Node> node = *it;
         int nDevs = node->GetNDevices();
         for (int j = 0; j < nDevs; j++) {
-            Ptr <LteUeNetDevice> uedev = node->GetDevice(j)->GetObject<LteUeNetDevice>();
-            Ptr <MmWaveUeNetDevice> mmuedev = node->GetDevice(j)->GetObject<MmWaveUeNetDevice>();
-            Ptr <McUeNetDevice> mcuedev = node->GetDevice(j)->GetObject<McUeNetDevice>();
+            Ptr<LteUeNetDevice> uedev = node->GetDevice(j)->GetObject<LteUeNetDevice>();
+            Ptr<MmWaveUeNetDevice> mmuedev = node->GetDevice(j)->GetObject<MmWaveUeNetDevice>();
+            Ptr<McUeNetDevice> mcuedev = node->GetDevice(j)->GetObject<McUeNetDevice>();
             if (uedev) {
                 Vector pos = node->GetObject<MobilityModel>()->GetPosition();
                 outFile << "set label \"" << uedev->GetImsi() << "\" at " << pos.x << "," << pos.y
@@ -114,11 +118,11 @@ PrintGnuplottableEnbListToFile(uint64_t m_startTime) {
     //
 
     for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); ++it) {
-        Ptr <Node> node = *it;
+        Ptr<Node> node = *it;
         int nDevs = node->GetNDevices();
         for (int j = 0; j < nDevs; j++) {
-            Ptr <LteEnbNetDevice> enbdev = node->GetDevice(j)->GetObject<LteEnbNetDevice>();
-            Ptr <MmWaveEnbNetDevice> mmdev = node->GetDevice(j)->GetObject<MmWaveEnbNetDevice>();
+            Ptr<LteEnbNetDevice> enbdev = node->GetDevice(j)->GetObject<LteEnbNetDevice>();
+            Ptr<MmWaveEnbNetDevice> mmdev = node->GetDevice(j)->GetObject<MmWaveEnbNetDevice>();
             if (enbdev) {
                 Vector pos = node->GetObject<MobilityModel>()->GetPosition();
                 std::ofstream outFile1;
@@ -195,32 +199,35 @@ PrintPosition(Ptr<Node> node, int iterator, std::string Filename, uint64_t m_sta
     uint64_t timestamp = m_startTime + (uint64_t) Simulator::Now().GetMilliSeconds();
 
     int imsi;
-    Ptr <Node> node1 = NodeList::GetNode(iterator);
+    Ptr<Node> node1 = NodeList::GetNode(iterator);
     int nDevs = node->GetNDevices();
     std::string filename = Filename;
     std::ofstream outFile;
     for (int j = 0; j < nDevs; j++) {
-        Ptr <McUeNetDevice> mcuedev = node1->GetDevice(j)->GetObject<McUeNetDevice>();
-        Ptr <LteUeNetDevice> uedev = node->GetDevice(j)->GetObject<LteUeNetDevice>();
-        Ptr <MmWaveUeNetDevice> mmuedev = node->GetDevice(j)->GetObject<MmWaveUeNetDevice>();
+        Ptr<McUeNetDevice> mcuedev = node1->GetDevice(j)->GetObject<McUeNetDevice>();
+        Ptr<LteUeNetDevice> uedev = node->GetDevice(j)->GetObject<LteUeNetDevice>();
+        Ptr<MmWaveUeNetDevice> mmuedev = node->GetDevice(j)->GetObject<MmWaveUeNetDevice>();
         if (mcuedev) {
             imsi = int(mcuedev->GetImsi());
+            int serving_cell;
             if (ue_assoc_list[imsi - 1] == 0) {
                 //NS_LOG_UNCOND ("Position of UE not stored, UE not associated to any cell!");
                 return;
+            } else {
+                serving_cell = ue_assoc_list[imsi - 1];
             }
-            Ptr <MobilityModel> model = node->GetObject<MobilityModel>();
+            Ptr<MobilityModel> model = node->GetObject<MobilityModel>();
             Vector position = model->GetPosition();
             NS_LOG_UNCOND("Position of UE with IMSI " << imsi << " is " << model->GetPosition()
                                                       << " at time "
-                                                      << Simulator::Now().GetSeconds());
+                                                      << Simulator::Now().GetSeconds() << ", UE connected to Cell: "
+                                                      << serving_cell);
 
             outFile.open(filename.c_str(), std::ios_base::out | std::ios_base::app);
             if (!outFile.is_open()) {
                 NS_LOG_ERROR("Can't open file " << filename);
                 return;
             }
-            int serving_cell = ue_assoc_list[imsi - 1];
 
             outFile << timestamp << "," << imsi << "," << position.x << "," << position.y << ",mc,"
                     << serving_cell << "," << m_startTime << std::endl;
@@ -277,6 +284,32 @@ PrintPosition(Ptr<Node> node, int iterator, std::string Filename, uint64_t m_sta
             outFile.close ();
         }*/
     }
+}
+
+void
+EnergyConsumptionUpdate(int nodeIndex, std::string filename, double totaloldEnergyConsumption,
+                        double totalnewEnergyConsumption) {
+    //std::cout << "mmWave cell " << nodeIndex+2 << ": Total Energy Consumption " << totalnewEnergyConsumption << "J" << std::endl;
+    Time currentTime = Simulator::Now();
+    std::ofstream outFile;
+    outFile.open(filename, std::ios_base::out | std::ios_base::app);
+    outFile << currentTime.GetSeconds() << ","
+            << totalnewEnergyConsumption << ","
+            << (totalnewEnergyConsumption - totaloldEnergyConsumption) << std::endl;
+    totalnewEnergyConsumption_storage[nodeIndex] = totalnewEnergyConsumption;
+
+}
+
+void
+EnergyConsumptionPrint(int nodeIndex) {
+    NS_LOG_UNCOND("Total energy consumption for mmWave cell " << nodeIndex + 2 << ": "
+                                                              << totalnewEnergyConsumption_storage[nodeIndex] << "J"
+                                                              << " at time "
+                                                              << Simulator::Now().GetSeconds()
+                                                              << ", diff from last measurement is: "
+                                                              << (totalnewEnergyConsumption_storage[nodeIndex] -
+                                                                  totaloldEnergyConsumption_storage[nodeIndex]) << "J");
+    totaloldEnergyConsumption_storage[nodeIndex] =  totalnewEnergyConsumption_storage[nodeIndex];
 }
 
 static ns3::GlobalValue g_bufferSize("bufferSize", "RLC tx buffer size (MB)",
@@ -358,25 +391,25 @@ static ns3::GlobalValue g_controlFileName("controlFileName",
                                           ns3::MakeStringChecker());
 
 // TODO: running flags
-static ns3::GlobalValue mmWave_nodes ("N_MmWaveEnbNodes", "Number of mmWaveNodes",
-                                      ns3::UintegerValue (4),
-                                      ns3::MakeUintegerChecker<uint8_t> ());
+static ns3::GlobalValue mmWave_nodes("N_MmWaveEnbNodes", "Number of mmWaveNodes",
+                                     ns3::UintegerValue(4),
+                                     ns3::MakeUintegerChecker<uint8_t>());
 // TODO: next step(make it in correct way, regarding to position)
 // static ns3::GlobalValue lteEnb_nodes ("N_LteEnbNodes", "Number of LteEnbNodes",
 //                                       ns3::UintegerValue (1),
 //                                       ns3::MakeUintegerChecker<uint8_t> ());
 
-static ns3::GlobalValue ue_s ("N_Ues", "Number of User Equipments",
-                                      ns3::UintegerValue (3),
-                                      ns3::MakeUintegerChecker<uint32_t> ());
+static ns3::GlobalValue ue_s("N_Ues", "Number of User Equipments",
+                             ns3::UintegerValue(3),
+                             ns3::MakeUintegerChecker<uint32_t>());
 
-static ns3::GlobalValue center_freq ("CenterFrequency", "Center Frequency Value",
-                                      ns3::DoubleValue (3.5e9),
-                                      ns3::MakeDoubleChecker<double> ());
+static ns3::GlobalValue center_freq("CenterFrequency", "Center Frequency Value",
+                                    ns3::DoubleValue(3.5e9),
+                                    ns3::MakeDoubleChecker<double>());
 
-static ns3::GlobalValue bandwidth_value ("Bandwidth", "Bandwidth Value",
-                                      ns3::DoubleValue (20e6),
-                                      ns3::MakeDoubleChecker<double> ());
+static ns3::GlobalValue bandwidth_value("Bandwidth", "Bandwidth Value",
+                                        ns3::DoubleValue(20e6),
+                                        ns3::MakeDoubleChecker<double>());
 // TODO: check for later
 // static ns3::GlobalValue num_antennas_McUe ("N_AntennasMcUe", "Number of Antenna as McUe",
 //                                       ns3::IntegerValue (1),
@@ -386,26 +419,26 @@ static ns3::GlobalValue bandwidth_value ("Bandwidth", "Bandwidth Value",
 //                                       ns3::IntegerValue (1),
 //                                       ns3::MakeIntegerChecker<int> ());
 
-static ns3::GlobalValue interside_distance_value_ue ("IntersideDistanceUEs", "Interside Distance Value",
-                                      ns3::DoubleValue (1000),
-                                      ns3::MakeDoubleChecker<double> ());
-static ns3::GlobalValue interside_distance_value_cell ("IntersideDistanceCells", "Interside Distance Value",
-                                                  ns3::DoubleValue (1000),
-                                                  ns3::MakeDoubleChecker<double> ());
+static ns3::GlobalValue interside_distance_value_ue("IntersideDistanceUEs", "Interside Distance Value",
+                                                    ns3::DoubleValue(1000),
+                                                    ns3::MakeDoubleChecker<double>());
+static ns3::GlobalValue interside_distance_value_cell("IntersideDistanceCells", "Interside Distance Value",
+                                                      ns3::DoubleValue(1000),
+                                                      ns3::MakeDoubleChecker<double>());
 
 int
 main(int argc, char *argv[]) {
     LogComponentEnableAll(LOG_PREFIX_ALL);
     //  LogComponentEnable ("RicControlMessage", LOG_LEVEL_ALL);
     //  LogComponentEnable ("KpmIndication", LOG_LEVEL_DEBUG);
-    LogComponentEnable("KpmIndication", LOG_LEVEL_INFO);
+    //LogComponentEnable("KpmIndication", LOG_LEVEL_INFO);
 
     // LogComponentEnable ("Asn1Types", LOG_LEVEL_LOGIC);
 //   LogComponentEnable ("E2Termination", LOG_LEVEL_LOGIC);
-    //  LogComponentEnable ("E2Termination", LOG_LEVEL_DEBUG);
+//LogComponentEnable ("MmWaveRadioEnergyModelEnb", LOG_LEVEL_ALL);
 
     // LogComponentEnable ("LteEnbNetDevice", LOG_LEVEL_ALL);
-    LogComponentEnable ("MmWaveEnbNetDevice", LOG_LEVEL_DEBUG);
+    // LogComponentEnable ("MmWaveEnbNetDevice", LOG_LEVEL_DEBUG);
 
     // The maximum X coordinate of the scenario
 
@@ -552,18 +585,18 @@ main(int argc, char *argv[]) {
     Config::SetDefault("ns3::LteEnbRrc::OutageThreshold", DoubleValue(outageThreshold));
     Config::SetDefault("ns3::LteEnbRrc::SecondaryCellHandoverMode", StringValue(handoverMode));
     Config::SetDefault("ns3::LteEnbRrc::HoSinrDifference", DoubleValue(hoSinrDifference));
-    Config::SetDefault("ns3::ThreeGppPropagationLossModel::Frequency",DoubleValue(3.5e9));
-    Config::SetDefault("ns3::ThreeGppPropagationLossModel::ShadowingEnabled",BooleanValue(false));
+    Config::SetDefault("ns3::ThreeGppPropagationLossModel::Frequency", DoubleValue(3.5e9));
+    Config::SetDefault("ns3::ThreeGppPropagationLossModel::ShadowingEnabled", BooleanValue(false));
     // Carrier bandwidth in Hz
-    GlobalValue::GetValueByName ("Bandwidth", doubleValue);
+    GlobalValue::GetValueByName("Bandwidth", doubleValue);
     double bandwidth = doubleValue.Get();
     // Center frequency in Hz
-    GlobalValue::GetValueByName ("CenterFrequency", doubleValue);
+    GlobalValue::GetValueByName("CenterFrequency", doubleValue);
     double centerFrequency = doubleValue.Get();
     // Distance between the mmWave BSs and the two co-located LTE and mmWave BSs in meters
-    GlobalValue::GetValueByName ("IntersideDistanceUEs", doubleValue);
+    GlobalValue::GetValueByName("IntersideDistanceUEs", doubleValue);
     double isd_ue = doubleValue.Get(); // (interside distance)
-    GlobalValue::GetValueByName ("IntersideDistanceCells", doubleValue);
+    GlobalValue::GetValueByName("IntersideDistanceCells", doubleValue);
     double isd_cell = doubleValue.Get(); // (interside distance)
 
     // Number of antennas in each UE
@@ -583,18 +616,18 @@ main(int argc, char *argv[]) {
     Config::SetDefault("ns3::MmWavePhyMacCommon::Bandwidth", DoubleValue(bandwidth));
     Config::SetDefault("ns3::MmWavePhyMacCommon::CenterFreq", DoubleValue(centerFrequency));
 
-    Ptr <MmWaveHelper> mmwaveHelper = CreateObject<MmWaveHelper>();
+    Ptr<MmWaveHelper> mmwaveHelper = CreateObject<MmWaveHelper>();
     mmwaveHelper->SetPathlossModelType("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
     mmwaveHelper->SetChannelConditionModelType("ns3::ThreeGppUmiStreetCanyonChannelConditionModel");
 
-    Ptr <MmWavePointToPointEpcHelper> epcHelper = CreateObject<MmWavePointToPointEpcHelper>();
+    Ptr<MmWavePointToPointEpcHelper> epcHelper = CreateObject<MmWavePointToPointEpcHelper>();
     mmwaveHelper->SetEpcHelper(epcHelper);
 
-    GlobalValue::GetValueByName ("N_MmWaveEnbNodes", uintegerValue);
+    GlobalValue::GetValueByName("N_MmWaveEnbNodes", uintegerValue);
     uint8_t nMmWaveEnbNodes = uintegerValue.Get();
     // GlobalValue::GetValueByName ("N_LteEnbNodes", uintegerValue);
     uint8_t nLteEnbNodes = 1; //uintegerValue.Get();
-    GlobalValue::GetValueByName ("N_Ues", uintegerValue);
+    GlobalValue::GetValueByName("N_Ues", uintegerValue);
     uint32_t ues = uintegerValue.Get();
     // TODO: discuss number of UEs implementation
     //uint8_t nUeNodes = ues * nMmWaveEnbNodes;
@@ -605,10 +638,10 @@ main(int argc, char *argv[]) {
                               << unsigned(nMmWaveEnbNodes));
 
     // Get SGW/PGW and create a single RemoteHost
-    Ptr <Node> pgw = epcHelper->GetPgwNode();
+    Ptr<Node> pgw = epcHelper->GetPgwNode();
     NodeContainer remoteHostContainer;
     remoteHostContainer.Create(1);
-    Ptr <Node> remoteHost = remoteHostContainer.Get(0);
+    Ptr<Node> remoteHost = remoteHostContainer.Get(0);
     InternetStackHelper internet;
     internet.Install(remoteHostContainer);
 
@@ -624,7 +657,7 @@ main(int argc, char *argv[]) {
     // interface 0 is localhost, 1 is the p2p device
     Ipv4Address remoteHostAddr = internetIpIfaces.GetAddress(1);
     Ipv4StaticRoutingHelper ipv4RoutingHelper;
-    Ptr <Ipv4StaticRouting> remoteHostStaticRouting =
+    Ptr<Ipv4StaticRouting> remoteHostStaticRouting =
             ipv4RoutingHelper.GetStaticRouting(remoteHost->GetObject<Ipv4>());
     remoteHostStaticRouting->AddNetworkRouteTo(Ipv4Address("7.0.0.0"), Ipv4Mask("255.0.0.0"), 1);
 
@@ -645,7 +678,7 @@ main(int argc, char *argv[]) {
     Vector centerPosition = Vector(maxXAxis / 2, maxYAxis / 2, 3);
 
     // Install Mobility Model
-    Ptr <ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator>();
+    Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator>();
 
     // We want a center with one LTE enb and one mmWave co-located in the same place
     enbPositionAlloc->Add(centerPosition);
@@ -667,12 +700,12 @@ main(int argc, char *argv[]) {
 
     MobilityHelper uemobility;
 
-    Ptr <UniformDiscPositionAllocator> uePositionAlloc = CreateObject<UniformDiscPositionAllocator>();
+    Ptr<UniformDiscPositionAllocator> uePositionAlloc = CreateObject<UniformDiscPositionAllocator>();
 
     uePositionAlloc->SetX(centerPosition.x);
     uePositionAlloc->SetY(centerPosition.y);
     uePositionAlloc->SetRho(isd_ue);
-    Ptr <UniformRandomVariable> speed = CreateObject<UniformRandomVariable>();
+    Ptr<UniformRandomVariable> speed = CreateObject<UniformRandomVariable>();
     speed->SetAttribute("Min", DoubleValue(2.0));
     speed->SetAttribute("Max", DoubleValue(4.0));
 
@@ -693,9 +726,9 @@ main(int argc, char *argv[]) {
     ueIpIface = epcHelper->AssignUeIpv4Address(NetDeviceContainer(mcUeDevs));
     // Assign IP address to UEs, and install applications
     for (uint32_t u = 0; u < ueNodes.GetN(); ++u) {
-        Ptr <Node> ueNode = ueNodes.Get(u);
+        Ptr<Node> ueNode = ueNodes.Get(u);
         // Set the default gateway for the UE
-        Ptr <Ipv4StaticRouting> ueStaticRouting =
+        Ptr<Ipv4StaticRouting> ueStaticRouting =
                 ipv4RoutingHelper.GetStaticRouting(ueNode->GetObject<Ipv4>());
         ueStaticRouting->SetDefaultRoute(epcHelper->GetUeDefaultGatewayAddress(), 1);
     }
@@ -705,6 +738,43 @@ main(int argc, char *argv[]) {
 
     // Manual attachment
     mmwaveHelper->AttachToClosestEnb(mcUeDevs, mmWaveEnbDevs, lteEnbDevs);
+
+    BasicEnergySourceHelper basicEnergySourceHelper;
+    basicEnergySourceHelper.Set("BasicEnergySourceInitialEnergyJ", DoubleValue(1000000000000));
+    basicEnergySourceHelper.Set("BasicEnergySupplyVoltageV", DoubleValue(5.0));
+    EnergySourceContainer sources = basicEnergySourceHelper.Install(mmWaveEnbNodes);
+    MmWaveRadioEnergyModelEnbHelper nrEnbHelper;
+
+    DeviceEnergyModelContainer deviceEModel = nrEnbHelper.Install(mmWaveEnbDevs, sources);
+
+    GlobalValue::GetValueByName("simTime", doubleValue);
+    double simTime = doubleValue.Get();
+    int numPrints = simTime / 0.1;
+
+    std::vector <std::ofstream> outFiles;
+    for (int x = 0; x < nMmWaveEnbNodes; ++x) {
+        std::ostringstream energyFileName;
+        energyFileName << "energyfilecell" << x + 2 << ".csv";
+
+        std::ofstream outFile;
+        outFile.open(energyFileName.str(), std::ios_base::out | std::ios_base::trunc);
+        outFile << "Time,NetEnergy,DiffEnergy" << std::endl;
+
+        outFiles.push_back(std::move(outFile));
+    }
+
+    for (int x = 0; x < nMmWaveEnbNodes; ++x) {
+        std::ostringstream filename;
+        filename << "energyfilecell" << x + 2 << ".csv";
+        deviceEModel.Get(x)->TraceConnectWithoutContext(
+                "TotalEnergyConsumption",
+                MakeBoundCallback(&EnergyConsumptionUpdate, x, filename.str()));
+        for (int i = 0; i < numPrints; i++) {
+            Simulator::Schedule(Seconds(i * simTime / numPrints), &EnergyConsumptionPrint, x);
+        }
+    }
+
+
 
     // Install and start applications
     // On the remoteHost there is UDP OnOff Application
@@ -732,8 +802,7 @@ main(int argc, char *argv[]) {
     }
 
     // Start applications
-    GlobalValue::GetValueByName("simTime", doubleValue);
-    double simTime = doubleValue.Get();
+
     sinkApp.Start(Seconds(0));
 
     clientApp.Start(MilliSeconds(100));
@@ -752,7 +821,7 @@ main(int argc, char *argv[]) {
     int nodecount = int(NodeList::GetNNodes());
     // NS_LOG_UNCOND ("number of nodes: " << nodecount);
     int UE_iterator = nodecount - int(nUeNodes);
-    int numPrints = simTime / 0.1;
+
 
     for (int i = 0; i < numPrints; i++) {
         Simulator::Schedule(Seconds(i * simTime / numPrints), &PrintGnuplottableEnbListToFile, t_startTime_simid);
@@ -767,7 +836,7 @@ main(int argc, char *argv[]) {
     }
 
     // trick to enable PHY traces for the LTE stack
-    Ptr <LteHelper> lteHelper = CreateObject<LteHelper>();
+    Ptr<LteHelper> lteHelper = CreateObject<LteHelper>();
     lteHelper->Initialize();
     lteHelper->EnablePhyTraces();
     lteHelper->EnableMacTraces();
