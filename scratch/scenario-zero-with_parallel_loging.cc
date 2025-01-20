@@ -420,10 +420,10 @@ static ns3::GlobalValue bandwidth_value("Bandwidth", "Bandwidth Value",
 //                                       ns3::MakeIntegerChecker<int> ());
 
 static ns3::GlobalValue interside_distance_value_ue("IntersideDistanceUEs", "Interside Distance Value",
-                                                    ns3::DoubleValue(1000),
+                                                    ns3::DoubleValue(500),
                                                     ns3::MakeDoubleChecker<double>());
 static ns3::GlobalValue interside_distance_value_cell("IntersideDistanceCells", "Interside Distance Value",
-                                                      ns3::DoubleValue(1000),
+                                                      ns3::DoubleValue(600),
                                                       ns3::MakeDoubleChecker<double>());
 
 int
