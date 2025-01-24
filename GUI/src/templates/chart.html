@@ -55,7 +55,7 @@
             margin-bottom: 5px;
         }
 
-        #simulationForm input {
+        #simulationForm input, #simulationForm select {
             padding: 10px;
             border-radius: 5px;
             border: none;
@@ -551,16 +551,26 @@
                 <input type="number" id="IntersideDistanceCells" name="IntersideDistanceCells" value="1000">
             </div>
             <div>
+                <div>
+                    <label for="scenario">Scenario: </label>
+                    <select id="scenario" name="scenario" onchange="setFlags()">
+                    </select>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: 0px;">
+                    <label for="flags">Scenario&nbsp;flags: </label>
+                    <input type="checkbox" id="flags" name="flags" value="true" style="transform: scale(1.5); margin-left: 0;">
+                </div>
+            </div>
+            <button type="button" onclick="sendForm('/start_simulation')" id="start_button">Start new</button>
+            <button type="button" onclick="stopSim('/stop_simulation')" id="stop_button" disabled>Stop</button>
+            <button type="button" onclick="resetSim('/reset_simulation')" id="reset_button">Reset</button>
+            <div>
                 <label>Status: </label>
                 <label id="status_label" style="text-align: center">off </label>
                 <label id="label_between_status_and_simid"></label>
                 <label id="simid_label" style="text-align: center; color: white"></label>
             </div>
-            <button type="button" onclick="sendForm('/start_simulation')" id="start_button">Start new</button>
-            <button type="button" onclick="stopSim('/stop_simulation')" id="stop_button" disabled>Stop</button>
-            <button type="button" onclick="resetSim('/reset_simulation')" id="reset_button">Reset</button>
             <div><label id="warning_label"></label></div>
-            <div></div>
             <div></div>
             <div></div>
             <div class="space_in_form"></div>
@@ -731,6 +741,7 @@
 </div>
 
 <script>
+    var defaultScenario = "scratch/scenario-zero-with_parallel_loging.cc";
     const host_ns3 = "{{ host_ns3 }}";
     document.getElementById('flexric').addEventListener('change', function () {
         var e2TermIpField = document.getElementById('e2TermIp');
@@ -1183,6 +1194,40 @@
             }
         }
     });
+
+    function setFlags() {
+        const select = document.getElementById("scenario");
+        const flags = document.getElementById("flags");
+        if (select.value == defaultScenario) {
+            flags.checked = true;
+        } else {
+            flags.checked = false;
+        }
+
+    }
+
+    !function buildScenarioOptions() {
+        const select = document.getElementById("scenario");
+        const flags = document.getElementById("flags");
+
+        let options = [];
+        fetch('/scenarios')
+                   .then(response => response.json())
+                   .then(options => {
+                        for(let i in options ) {
+                            let opt = options[i];
+                            let el = document.createElement("option");
+                            el.textContent = opt;
+                            el.value = opt;
+                            if (opt == defaultScenario) {
+                                el.selected = true;
+                                el.defaultSelected = true;
+                                flags.checked = true;
+                            }
+                            select.appendChild(el);
+                        }
+                   });
+    }();
 
     function updateChart() {
         fetch('/refresh-data')
@@ -1712,7 +1757,10 @@
         statusLabel.textContent = 'Simulation starting';
         startButton.disabled = true
         stopButton.disabled = false
-
+        const select = document.getElementById("scenario");
+        const flags = document.getElementById("flags");
+        scenario.disabled = true
+        flags.disabled = true
         fetch(endpoint, {
             method: 'POST',
             headers: {
@@ -1749,6 +1797,10 @@
         startButton.disabled = false
         stopButton.disabled = true
         resetButton.disabled = false
+        const select = document.getElementById("scenario");
+        const flags = document.getElementById("flags");
+        scenario.disabled = false
+        flags.disabled = false
         fetch(endpoint, {
             method: 'POST',
             headers: {
