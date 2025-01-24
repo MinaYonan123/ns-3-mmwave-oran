@@ -5,6 +5,7 @@ from src.simulation_objects.simulation import Simulation
 
 class SimulationManager:
     _simulation: Optional[Simulation] = None
+    scenario: str = ''
 
     @classmethod
     def get_simulation(cls) -> Simulation:
@@ -79,9 +80,18 @@ class SimulationManager:
         cls._simulation = None
 
     @classmethod
-    def start_simulation(cls):
+    def start_simulation(cls, scenario):
         cls._simulation.simulation_status = 'on'
+        cls.scenario = scenario
+        if not scenario:
+            raise Exception("Empty scenario")
+
 
     @classmethod
     def stop_simulation(cls):
         cls._simulation.simulation_status = 'off'
+        cls.scenario = ''
+
+    @classmethod
+    def get_scenario(cls):
+        return cls.scenario

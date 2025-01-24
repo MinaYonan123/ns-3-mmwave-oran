@@ -344,7 +344,7 @@ static ns3::GlobalValue
 static ns3::GlobalValue
         g_e2andlog("E2andLogging",
                    "If true, generate offline file logging instead of connecting to RIC",
-                   ns3::BooleanValue(false), ns3::MakeBooleanChecker());
+                   ns3::BooleanValue(true), ns3::MakeBooleanChecker());
 static ns3::GlobalValue g_e2_func_id("KPM_E2functionID", "Function ID to subscribe",
                                      ns3::DoubleValue(2),
                                      ns3::MakeDoubleChecker<double>());
