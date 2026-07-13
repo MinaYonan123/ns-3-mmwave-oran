@@ -676,7 +676,9 @@ MmWaveEnbNetDevice::UpdateConfig (void)
               csv << header_csv + "," + cell_header + "," + ue_header + "\n";
               csv.close ();
               // TODO: Look at RicSubscriptionRequest_rval_s
-              std::string plmId = "111";
+              uint8_t plmnBCD_kpm[3];
+              encoding::encode_plmn_bcd (plmnBCD_kpm, "001", "01");
+              std::string plmId (reinterpret_cast<char*>(plmnBCD_kpm), 3);
               std::string gnbId = std::to_string (m_cellId);
               Simulator::Schedule (MilliSeconds (100), &MmWaveEnbNetDevice::BuildGUIDu, this, plmId,
                                    m_cellId);
@@ -1639,7 +1641,9 @@ MmWaveEnbNetDevice::BuildRicIndicationMessageDu (std::string plmId, uint16_t nrC
 void
 MmWaveEnbNetDevice::BuildAndSendReportMessage (E2Termination::RicSubscriptionRequest_rval_s params)
 {
-  std::string plmId = "111";
+  uint8_t plmnBCD_rpt[3];
+  encoding::encode_plmn_bcd (plmnBCD_rpt, "001", "01");
+  std::string plmId (reinterpret_cast<char*>(plmnBCD_rpt), 3);
   std::string gnbId = std::to_string (m_cellId);
 
   // TODO here we can get something from RRC and onward

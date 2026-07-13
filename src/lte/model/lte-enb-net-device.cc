@@ -1104,7 +1104,9 @@ LteEnbNetDevice::BuildRicIndicationMessageCuCp (std::string plmId)
 void
 LteEnbNetDevice::BuildAndSendReportMessage (E2Termination::RicSubscriptionRequest_rval_s params)
 {
-  std::string plmId = "111";
+  uint8_t plmnBCD_lte[3];
+  encoding::encode_plmn_bcd (plmnBCD_lte, "001", "01");
+  std::string plmId (reinterpret_cast<char*>(plmnBCD_lte), 3);
   std::string gnbId = std::to_string (m_cellId);
 
   // TODO here we can get something from RRC and onward
