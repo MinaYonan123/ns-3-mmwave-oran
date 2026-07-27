@@ -896,7 +896,6 @@ nrHelper->EnableTraces();
         NS_LOG_WARN("PDCP Stats Calculator is NULL - E2 PDCP reporting will not work!");
     }
 
-    nrHelper->StartEnergyMonitoring();
 
     FlowMonitorHelper flowmonHelper;
     NodeContainer endpointNodes;

@@ -93,22 +93,13 @@ double maxYAxis;
 int cell_it = 0;
 
 std::vector<Ptr<NrGnbPhy>> allGnbPhys;
-std::vector<Ptr<NrUePhy>> allUePhys;
 
 void PeriodicEnergyUpdate()
 {
-    // Update gNB PHY energy
     for (auto phy : allGnbPhys)
     {
         phy->UpdateEnergyConsumption(MilliSeconds(100));
     }
-    
-    // Update UE PHY energy
-    for (auto phy : allUePhys)
-    {
-        phy->UpdateEnergyConsumption(MilliSeconds(100));
-    }
-    
     Simulator::Schedule(MilliSeconds(100), &PeriodicEnergyUpdate);
 }
 
@@ -776,24 +767,6 @@ main(int argc, char* argv[])
         }
     }
     
-    // Collect all UE PHYs
-    allUePhys.clear();
-    NetDeviceContainer allUeDevs;
-    allUeDevs.Add(ueLowLatNetDev);
-    allUeDevs.Add(ueVoiceNetDev);
-    
-    for (uint32_t i = 0; i < allUeDevs.GetN(); ++i) {
-        Ptr<NrUeNetDevice> ueDev = DynamicCast<NrUeNetDevice>(allUeDevs.Get(i));
-        if (ueDev) {
-            for (uint32_t j = 0; j < ueDev->GetCcMapSize(); ++j) {
-                Ptr<NrUePhy> phy = ueDev->GetPhy(j);
-                if (phy) {
-                    allUePhys.push_back(phy);
-                }
-            }
-        }
-    }
-    
     // Start periodic energy update for all PHYs
     PeriodicEnergyUpdate();
 
@@ -962,8 +935,6 @@ main(int argc, char* argv[])
     clientApps.Stop(simTime);
 
     // Traces were already enabled before attachment
-    // Just start energy monitoring here
-    nrHelper->StartEnergyMonitoring();
 
     FlowMonitorHelper flowmonHelper;
     NodeContainer endpointNodes;
