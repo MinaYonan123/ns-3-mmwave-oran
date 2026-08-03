@@ -346,7 +346,6 @@ def compute_rays(sionna_structure):
 def get_path_loss(car1_id, car2_id, sionna_structure):
     # Was the requested value already calculated?
     if car1_id not in sionna_structure["rays_cache"] or car2_id not in sionna_structure["rays_cache"][car1_id]:
-        print ("iam heeer")
         compute_rays(sionna_structure)
 
     path_coefficients = sionna_structure["rays_cache"][car1_id][car2_id]["path_coefficients"]

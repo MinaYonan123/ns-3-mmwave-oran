@@ -40,102 +40,162 @@ using namespace mmwave;
  * 
  */
   
-
+ int ue_assoc_list[10] = {0};
 
 NS_LOG_COMPONENT_DEFINE ("ScenarioThree");
 
 void
-PrintGnuplottableUeListToFile (std::string filename)
-{
-  std::ofstream outFile;
-  outFile.open (filename.c_str (), std::ios_base::out | std::ios_base::trunc);
-  if (!outFile.is_open ())
-    {
-      NS_LOG_ERROR ("Can't open file " << filename);
-      return;
+PrintGnuplottableUeListToFile(std::string filename) {
+    std::ofstream outFile;
+    outFile.open(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
+    if (!outFile.is_open()) {
+        NS_LOG_ERROR("Can't open file " << filename);
+        return;
     }
-  for (NodeList::Iterator it = NodeList::Begin (); it != NodeList::End (); ++it)
-    {
-      Ptr<Node> node = *it;
-      int nDevs = node->GetNDevices ();
-      for (int j = 0; j < nDevs; j++)
-        {
-          Ptr<LteUeNetDevice> uedev = node->GetDevice (j)->GetObject<LteUeNetDevice> ();
-          Ptr<MmWaveUeNetDevice> mmuedev = node->GetDevice (j)->GetObject<MmWaveUeNetDevice> ();
-          Ptr<McUeNetDevice> mcuedev = node->GetDevice (j)->GetObject<McUeNetDevice> ();
-          if (uedev)
-            {
-              Vector pos = node->GetObject<MobilityModel> ()->GetPosition ();
-              outFile << "set label \"" << uedev->GetImsi () << "\" at " << pos.x << "," << pos.y
-                      << " left font \"Helvetica,8\" textcolor rgb \"black\" front point pt 1 ps "
-                         "0.3 lc rgb \"black\" offset 0,0"
-                      << std::endl;
-            }
-          else if (mmuedev)
-            {
-              Vector pos = node->GetObject<MobilityModel> ()->GetPosition ();
-              outFile << "set label \"" << mmuedev->GetImsi () << "\" at " << pos.x << "," << pos.y
-                      << " left font \"Helvetica,8\" textcolor rgb \"black\" front point pt 1 ps "
-                         "0.3 lc rgb \"black\" offset 0,0"
-                      << std::endl;
-            }
-          else if (mcuedev)
-            {
-              Vector pos = node->GetObject<MobilityModel> ()->GetPosition ();
-              outFile << "set label \"" << mcuedev->GetImsi () << "\" at " << pos.x << "," << pos.y
-                      << " left font \"Helvetica,8\" textcolor rgb \"black\" front point pt 1 ps "
-                         "0.3 lc rgb \"black\" offset 0,0"
-                      << std::endl;
+    for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); ++it) {
+        Ptr <Node> node = *it;
+        int nDevs = node->GetNDevices();
+        for (int j = 0; j < nDevs; j++) {
+            Ptr <LteUeNetDevice> uedev = node->GetDevice(j)->GetObject<LteUeNetDevice>();
+            Ptr <MmWaveUeNetDevice> mmuedev = node->GetDevice(j)->GetObject<MmWaveUeNetDevice>();
+            Ptr <McUeNetDevice> mcuedev = node->GetDevice(j)->GetObject<McUeNetDevice>();
+            if (uedev) {
+                Vector pos = node->GetObject<MobilityModel>()->GetPosition();
+                outFile << "set label \"" << uedev->GetImsi() << "\" at " << pos.x << "," << pos.y
+                        << " left font \"Helvetica,8\" textcolor rgb \"black\" front point pt 1 ps "
+                           "0.3 lc rgb \"black\" offset 0,0"
+                        << std::endl;
+            } else if (mmuedev) {
+                Vector pos = node->GetObject<MobilityModel>()->GetPosition();
+                outFile << "set label \"" << mmuedev->GetImsi() << "\" at " << pos.x << "," << pos.y
+                        << " left font \"Helvetica,8\" textcolor rgb \"black\" front point pt 1 ps "
+                           "0.3 lc rgb \"black\" offset 0,0"
+                        << std::endl;
+            } else if (mcuedev) {
+                Vector pos = node->GetObject<MobilityModel>()->GetPosition();
+                outFile << "set label \"" << mcuedev->GetImsi() << "\" at " << pos.x << "," << pos.y
+                        << " left font \"Helvetica,8\" textcolor rgb \"black\" front point pt 1 ps "
+                           "0.3 lc rgb \"black\" offset 0,0"
+                        << std::endl;
             }
         }
     }
 }
 
 void
-PrintGnuplottableEnbListToFile (std::string filename)
-{
-  std::ofstream outFile;
-  outFile.open (filename.c_str (), std::ios_base::out | std::ios_base::trunc);
-  if (!outFile.is_open ())
-    {
-      NS_LOG_ERROR ("Can't open file " << filename);
-      return;
-    }
-  for (NodeList::Iterator it = NodeList::Begin (); it != NodeList::End (); ++it)
-    {
-      Ptr<Node> node = *it;
-      int nDevs = node->GetNDevices ();
-      for (int j = 0; j < nDevs; j++)
-        {
-          Ptr<LteEnbNetDevice> enbdev = node->GetDevice (j)->GetObject<LteEnbNetDevice> ();
-          Ptr<MmWaveEnbNetDevice> mmdev = node->GetDevice (j)->GetObject<MmWaveEnbNetDevice> ();
-          if (enbdev)
-            {
-              Vector pos = node->GetObject<MobilityModel> ()->GetPosition ();
-              outFile << "set label \"" << enbdev->GetCellId () << "\" at " << pos.x << "," << pos.y
-                      << " left font \"Helvetica,8\" textcolor rgb \"blue\" front  point pt 4 ps "
-                         "0.3 lc rgb \"blue\" offset 0,0"
-                      << std::endl;
-            }
-          else if (mmdev)
-            {
-              Vector pos = node->GetObject<MobilityModel> ()->GetPosition ();
-              outFile << "set label \"" << mmdev->GetCellId () << "\" at " << pos.x << "," << pos.y
-                      << " left font \"Helvetica,8\" textcolor rgb \"red\" front  point pt 4 ps "
-                         "0.3 lc rgb \"red\" offset 0,0"
-                      << std::endl;
+PrintGnuplottableEnbListToFile(uint64_t m_startTime) {
+
+  //uint64_t m_startTime = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
+  uint64_t timestamp = m_startTime + (uint64_t) Simulator::Now().GetMilliSeconds();
+  //
+  std::string filename1 = "enbs.txt";
+  std::string filename2 = "gnbs.txt";
+  //
+  for (NodeList::Iterator it = NodeList::Begin(); it != NodeList::End(); ++it) {
+      Ptr <Node> node = *it;
+      int nDevs = node->GetNDevices();
+      for (int j = 0; j < nDevs; j++) {
+          Ptr <LteEnbNetDevice> enbdev = node->GetDevice(j)->GetObject<LteEnbNetDevice>();
+          Ptr <MmWaveEnbNetDevice> mmdev = node->GetDevice(j)->GetObject<MmWaveEnbNetDevice>();
+          if (enbdev) {
+              Vector pos = node->GetObject<MobilityModel>()->GetPosition();
+              std::ofstream outFile1;
+              outFile1.open(filename1.c_str(), std::ios_base::out | std::ios_base::app);
+              if (!outFile1.is_open()) {
+                  NS_LOG_ERROR("Can't open file " << filename1);
+                  return;
+                }
+                //outFile1 << timestamp << "," << enbdev->GetCellId() << "," << pos.x << "," << pos.y << pos.z << std::endl;
+                outFile1 << timestamp << "," << enbdev->GetCellId() << "," << pos.x << "," << pos.y << ","
+                         << m_startTime << "," << "0" << "," << "30" << std::endl;
+                outFile1.close();
+            } else if (mmdev) {
+                Vector pos = node->GetObject<MobilityModel>()->GetPosition();
+                std::ofstream outFile2;
+                outFile2.open(filename2.c_str(), std::ios_base::out | std::ios_base::app);
+                if (!outFile2.is_open()) {
+                    NS_LOG_ERROR("Can't open file " << filename2);
+                    return;
+                }
+                auto ueMap = mmdev->GetUeMap();
+                for (const auto &ue: ueMap) {
+                    uint64_t imsi_assoc = ue.second->GetImsi();
+                    ue_assoc_list[imsi_assoc - 1] = mmdev->GetCellId();
+                }
+                uint16_t cell_id = mmdev->GetCellId();
+                outFile2 << timestamp << "," << cell_id << "," << pos.x << "," << pos.y << ","
+                         << m_startTime << "," << "0" << "," << "0" << "," << "0" << "," << "0" << std::endl;
+                outFile2.close();
             }
         }
     }
 }
 
 void
-PrintPosition (Ptr<Node> node)
-{
-  Ptr<MobilityModel> model = node->GetObject<MobilityModel> ();
-  NS_LOG_UNCOND ("Position +****************************** " << model->GetPosition () << " at time "
-                                                             << Simulator::Now ().GetSeconds ());
+ClearFile(std::string Filename, uint64_t m_startTime, double maxX = 0, double maxY = 0) {
+    std::ofstream outFile;
+    outFile.open(Filename.c_str(), std::ios_base::out | std::ios_base::trunc);
+    if (!outFile.is_open()) {
+        NS_LOG_ERROR("Can't open file " << Filename);
+        return;
+    }
+    outFile.close();
+    uint64_t timestamp = m_startTime + (uint64_t) Simulator::Now().GetMilliSeconds();
+    std::ofstream outFile1;
+    outFile1.open(Filename.c_str(), std::ios_base::out | std::ios_base::app);
+    if (Filename == "ue_position.txt") {
+        outFile1 << "timestamp,id,x,y,type,cell,simid" << std::endl;
+    } else {
+        outFile1 << "timestamp,id,x,y,simid,ESstate,currEC,maxEC,totalcurrEC" << std::endl;
+        outFile1 << timestamp << "," << "0" << "," << maxX << "," << maxY << std::endl;
+    }
+    outFile1.close();
 }
+
+void
+PrintPosition(Ptr<Node> node, int iterator, std::string Filename, uint64_t m_startTime) {
+
+    //uint64_t m_startTime = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
+    uint64_t timestamp = m_startTime + (uint64_t) Simulator::Now().GetMilliSeconds();
+
+  int imsi;
+  Ptr <Node> node1 = NodeList::GetNode(iterator);
+  int nDevs = node->GetNDevices();
+  std::string filename = Filename;
+  std::ofstream outFile;
+  for (int j = 0; j < nDevs; j++) {
+      Ptr <McUeNetDevice> mcuedev = node1->GetDevice(j)->GetObject<McUeNetDevice>();
+      Ptr <LteUeNetDevice> uedev = node->GetDevice(j)->GetObject<LteUeNetDevice>();
+      Ptr <MmWaveUeNetDevice> mmuedev = node->GetDevice(j)->GetObject<MmWaveUeNetDevice>();
+      if (mcuedev) {
+          imsi = int(mcuedev->GetImsi());
+          int serving_cell = ue_assoc_list[imsi - 1];
+          if (serving_cell==0){
+              serving_cell=1;
+            } 
+          Ptr<MobilityModel> model = node->GetObject<MobilityModel> ();
+          Vector position = model->GetPosition ();
+          NS_LOG_UNCOND ("Position of UE with IMSI " << imsi << " is " << model->GetPosition ()
+                                                     << " at time "
+                                                     << Simulator::Now ().GetSeconds ()
+                                                     << ", UE connected to Cell: " << serving_cell);
+            outFile.open(filename.c_str(), std::ios_base::out | std::ios_base::app);
+            if (!outFile.is_open()) {
+                NS_LOG_ERROR("Can't open file " << filename);
+                return;
+            }
+
+          outFile << timestamp << "," << imsi << "," << position.x << "," << position.y << ",mc,"
+                  << serving_cell << "," << m_startTime << std::endl;
+          outFile.close ();
+        }
+      else
+        {
+          //
+        }
+    }
+}
+
 
 static ns3::GlobalValue g_bufferSize ("bufferSize", "RLC tx buffer size (MB)",
                                       ns3::UintegerValue (10),
@@ -489,6 +549,9 @@ Config::SetDefault("ns3::PhasedArrayModel::AntennaElement",
 
   // Manual attachment
   mmwaveHelper->AttachToClosestEnb (mcUeDevs, mmWaveEnbDevs, lteEnbDevs);
+  GlobalValue::GetValueByName ("simTime", doubleValue);
+  double simTime = doubleValue.Get ();
+  int numPrints = simTime / 0.1;
 
   // Install and start applications
   // On the remoteHost there is UDP OnOff Application
@@ -516,23 +579,30 @@ Config::SetDefault("ns3::PhasedArrayModel::AntennaElement",
       clientApp.Add (dlClient.Install (remoteHost));
     }
 
-  // Start applications
-  GlobalValue::GetValueByName ("simTime", doubleValue);
-  double simTime = doubleValue.Get ();
+  
   sinkApp.Start (Seconds (0));
 
   clientApp.Start (MilliSeconds (100));
   clientApp.Stop (Seconds (simTime - 0.1));
 
-  // int numPrints = 5;
-  // for (int i = 0; i < numPrints; i++)
-  //   {
-  //     for (uint32_t j = 0; j < ueNodes.GetN (); j++)
-  //       {
-  //         Simulator::Schedule (Seconds (i * simTime / numPrints), &PrintPosition, ueNodes.Get (j));
-  //       }
-  //   }
-
+  struct timeval time_now{};
+  gettimeofday(&time_now, nullptr);
+  uint64_t t_startTime_simid = (time_now.tv_sec * 1000) + (time_now.tv_usec / 1000);
+  std::string ue_poss_out = "ue_position.txt";
+  ClearFile(ue_poss_out, t_startTime_simid);
+  ClearFile("enbs.txt", t_startTime_simid, maxXAxis, maxYAxis);
+  ClearFile("gnbs.txt", t_startTime_simid, maxXAxis, maxYAxis);
+  // Since nodes are randomly allocated during each run we always need to print their positions
+  PrintGnuplottableUeListToFile("ues.txt");
+  int nodecount = int(NodeList::GetNNodes());
+  int UE_iterator = nodecount - int (nUeNodes);
+  for (int i = 1; i < numPrints; i++) {
+    Simulator::Schedule(Seconds(i * simTime / numPrints), &PrintGnuplottableEnbListToFile, t_startTime_simid);
+    for (uint32_t j = 0; j < ueNodes.GetN(); j++) {
+        Simulator::Schedule(Seconds(i * simTime / numPrints), &PrintPosition, ueNodes.Get(j),
+                             j + UE_iterator, ue_poss_out, t_startTime_simid);
+      }
+  }
   if (enableTraces)
     {
       mmwaveHelper->EnableTraces ();
@@ -545,8 +615,8 @@ Config::SetDefault("ns3::PhasedArrayModel::AntennaElement",
   lteHelper->EnableMacTraces ();
 
   // Since nodes are randomly allocated during each run we always need to print their positions
-  PrintGnuplottableUeListToFile ("ues.txt");
-  PrintGnuplottableEnbListToFile ("enbs.txt");
+  // PrintGnuplottableUeListToFile ("ues.txt");
+  // PrintGnuplottableEnbListToFile ("enbs.txt");
 
   bool run = true;
   if (run)

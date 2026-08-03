@@ -1830,10 +1830,8 @@ MmWaveHelper::InstallSingleEnbDevice(Ptr<Node> n)
     NS_ABORT_MSG_IF(m_useCa && ccMap.size() < 2,
                     "You have to either specify carriers or disable carrier aggregation");
     NS_ASSERT(ccMap.size() == m_noOfCcs);
-    printf("iam here ");
     for (auto it = ccMap.begin(); it != ccMap.end(); ++it)
     {   
-        printf ("iam in for ");
         NS_LOG_DEBUG(this << "component carrier map size " << (uint16_t)ccMap.size());
         Ptr<MmWaveComponentCarrierEnb> ccEnb = DynamicCast<MmWaveComponentCarrierEnb>(it->second);
 
@@ -2198,11 +2196,22 @@ MmWaveHelper::InstallSingleEnbDevice(Ptr<Node> n)
     }*/
         if(m_e2mode_nr) {
     const uint16_t local_port = m_e2localPort + (uint16_t) cellId;
-    const std::string gnb_id{std::to_string (cellId)};
-    
-    std::string plmnId = "111";
 
-    NS_LOG_INFO ("cell_id " << gnb_id);
+    // Encode gNB ID as 4-byte big-endian binary (cellId as uint32)
+    uint32_t gnbIdVal = (uint32_t) cellId;
+    uint8_t gnbBE[4] = {
+        (uint8_t)((gnbIdVal >> 24) & 0xFF),
+        (uint8_t)((gnbIdVal >> 16) & 0xFF),
+        (uint8_t)((gnbIdVal >>  8) & 0xFF),
+        (uint8_t)( gnbIdVal        & 0xFF)
+    };
+    const std::string gnb_id (reinterpret_cast<char*>(gnbBE), 4);
+
+    // BCD-encode PLMN: MCC=001, MNC=01 → bytes {0x00, 0xF1, 0x10}
+    uint8_t plmnBCD[4] = {0x00, 0xF1, 0x10};
+    std::string plmnId (reinterpret_cast<char*>(plmnBCD), 3);
+
+    NS_LOG_INFO ("cell_id " << cellId << " gnbId (BE) encoded, plmnId (BCD) MCC=001 MNC=01");
     Ptr<E2Termination> e2term =
         CreateObject<E2Termination> (m_e2ip, m_e2port, local_port, gnb_id, plmnId);
 
@@ -2506,10 +2515,22 @@ MmWaveHelper::InstallSingleLteEnbDevice(Ptr<Node> n)
 
   if(m_e2mode_lte) {
     const uint16_t local_port = m_e2localPort + (uint16_t)cellId;
-    const std::string enb_id{std::to_string (cellId)};
-    std::string plmnId = "111";
 
-    NS_LOG_INFO("enb_id " << enb_id);
+    // Encode eNB ID as 4-byte big-endian binary (cellId as uint32)
+    uint32_t enbIdVal = (uint32_t) cellId;
+    uint8_t enbBE[4] = {
+        (uint8_t)((enbIdVal >> 24) & 0xFF),
+        (uint8_t)((enbIdVal >> 16) & 0xFF),
+        (uint8_t)((enbIdVal >>  8) & 0xFF),
+        (uint8_t)( enbIdVal        & 0xFF)
+    };
+    const std::string enb_id (reinterpret_cast<char*>(enbBE), 4);
+
+    // BCD-encode PLMN: MCC=001, MNC=01 → bytes {0x00, 0xF1, 0x10}
+    uint8_t plmnBCD_lte[3] = {0x00, 0xF1, 0x10};
+    std::string plmnId (reinterpret_cast<char*>(plmnBCD_lte), 3);
+
+    NS_LOG_INFO("enb_id " << cellId << " (BE) encoded, plmnId (BCD) MCC=001 MNC=01");
     Ptr<E2Termination> e2term =
         CreateObject<E2Termination> (m_e2ip, m_e2port, local_port, enb_id, plmnId);
 
